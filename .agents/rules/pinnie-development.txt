@@ -1,0 +1,843 @@
+
+# Pinnie — Development Rules
+
+## 1. Sobre o projeto
+
+O Pinnie é uma plataforma de descoberta, organização e compartilhamento de conteúdo visual, inspirada no conceito do Pinterest, mas com identidade e proposta próprias.
+
+A proposta principal é oferecer uma experiência visual limpa, sem anúncios invasivos no feed e sem redirecionamentos inesperados ao clicar em uma imagem.
+
+O usuário deve conseguir visualizar o conteúdo dentro do Pinnie e, somente se desejar, visitar a fonte original.
+
+O Pinnie será desenvolvido inicialmente como um MVP e poderá evoluir posteriormente para uma plataforma real, com recursos sociais, recomendação personalizada, busca avançada e IA.
+
+---
+
+## 2. Stack planejada
+
+### Backend
+
+- Java
+- Spring Boot
+- Spring Web
+- Spring Security
+- Spring Data JPA
+- PostgreSQL
+- Flyway
+- Bean Validation
+- OpenAPI / Swagger
+- Maven
+
+### Frontend
+
+- Vue 3
+- Vue Router
+- Pinia
+
+### Infraestrutura
+
+- Docker
+- Docker Compose
+- Git
+- CI/CD posteriormente
+
+---
+
+## 3. Regra principal do agente
+
+O agente NÃO deve implementar grandes partes do projeto automaticamente.
+
+O desenvolvimento deve acontecer em módulos pequenos e independentes.
+
+Antes de implementar qualquer módulo, o agente deve:
+
+1. analisar o problema;
+2. explicar a solução proposta;
+3. apresentar as decisões técnicas;
+4. informar quais arquivos serão criados ou modificados;
+5. informar quais dependências serão necessárias;
+6. explicar como a implementação será testada;
+7. aguardar aprovação explícita.
+
+Somente depois da aprovação deve implementar o módulo solicitado.
+
+---
+
+## 4. Fluxo obrigatório
+
+O desenvolvimento deve seguir:
+
+ANALISAR
+→ EXPLICAR
+→ AGUARDAR APROVAÇÃO
+→ IMPLEMENTAR
+→ TESTAR
+→ DOCUMENTAR
+→ AGUARDAR PRÓXIMO MÓDULO
+
+O agente não deve avançar automaticamente para o próximo módulo.
+
+---
+
+## 5. Regras de desenvolvimento
+
+- Não implementar funcionalidades não solicitadas.
+- Não modificar arquivos não relacionados ao módulo atual.
+- Não adicionar dependências sem explicar o motivo.
+- Não alterar a arquitetura sem aprovação.
+- Não criar funcionalidades futuras antecipadamente.
+- Não introduzir tecnologias complexas sem necessidade.
+- Não armazenar senhas em texto puro.
+- Nunca colocar credenciais reais no código.
+- Nunca colocar segredos no Git.
+- Manter um `.env.example`.
+- Validar dados recebidos pelo backend.
+- Implementar autorização no backend, não apenas no frontend.
+- Manter o projeto executável após cada módulo.
+- Criar testes para regras importantes.
+- Documentar decisões técnicas relevantes.
+- Explicar erros encontrados em vez de escondê-los.
+- Não considerar uma tarefa concluída sem fornecer instruções para testá-la.
+- Não apagar ou substituir código existente sem explicar o motivo.
+- Não fazer refatorações fora do escopo da tarefa.
+- Preferir soluções simples e evolutivas.
+
+---
+
+## 6. Comunicação com a desenvolvedora
+
+A desenvolvedora deve conseguir entender o que está sendo feito.
+
+Ao propor uma solução técnica, explicar:
+
+- o que será feito;
+- por que será feito;
+- alternativas consideradas;
+- solução recomendada;
+- vantagens e desvantagens;
+- impacto futuro.
+
+Não assumir que a solução mais complexa é a melhor.
+
+Sempre que houver uma decisão arquitetural relevante, apresentar a decisão antes de implementá-la.
+
+---
+
+## 7. Ao concluir um módulo
+
+Informar:
+
+1. o que foi implementado;
+2. arquivos criados;
+3. arquivos modificados;
+4. dependências adicionadas;
+5. comandos para executar;
+6. testes realizados;
+7. resultado dos testes;
+8. problemas encontrados;
+9. próximo passo sugerido.
+
+Depois disso, aguardar autorização.
+
+---
+
+## 8. Arquitetura inicial
+
+A arquitetura inicial pretendida é:
+
+Frontend Vue
+↓
+REST API
+↓
+Spring Boot
+↓
+PostgreSQL
+
+Para imagens:
+
+Frontend
+↓
+Spring Boot
+↓
+Image Storage
+↓
+URL armazenada no PostgreSQL
+
+Durante o desenvolvimento inicial, pode ser utilizado armazenamento local.
+
+A arquitetura deve permitir posteriormente migrar para object storage sem reescrever a lógica de negócio.
+
+---
+
+## 9. MVP
+
+O MVP inicial deverá conter:
+
+- cadastro;
+- login;
+- logout;
+- perfil;
+- Boards;
+- Pins;
+- upload de imagens;
+- visualização de Pins;
+- salvar Pins em Boards;
+- feed;
+- busca básica;
+- interface responsiva;
+- testes;
+- Swagger/OpenAPI;
+- Docker.
+
+### Funcionalidades que NÃO devem ser implementadas no MVP inicial
+
+- inteligência artificial;
+- sistema de recomendação;
+- comentários;
+- notificações;
+- sistema social complexo;
+- Elasticsearch;
+- Redis;
+- Kafka;
+- Kubernetes;
+- microserviços.
+
+Esses recursos poderão ser adicionados posteriormente.
+
+---
+
+## 10. Conceitos principais
+
+### User
+
+Representa um usuário do Pinnie.
+
+### Board
+
+Uma coleção criada por um usuário para organizar Pins.
+
+Exemplos:
+
+- Ideias de decoração
+- Looks
+- Receitas
+- Viagens
+- Wishlist
+
+### Pin
+
+Um conteúdo visual publicado na plataforma.
+
+Um Pin deve possuir uma imagem e pode possuir título, descrição e fonte original.
+
+### BoardPin
+
+Relacionamento entre Boards e Pins.
+
+Um Pin pode estar em vários Boards.
+
+---
+
+## 11. Regras de negócio iniciais
+
+### Pins
+
+Um Pin deve possuir uma imagem.
+
+Um Pin pode possuir uma fonte original.
+
+A fonte original NÃO deve substituir a visualização do Pin.
+
+O usuário deve conseguir visualizar o conteúdo dentro do Pinnie antes de decidir visitar a fonte externa.
+
+### Boards
+
+Um usuário pode criar múltiplos Boards.
+
+Boards podem ser públicos ou privados.
+
+Somente o proprietário pode editar ou excluir seus Boards.
+
+### Pins salvos
+
+Um Pin pode ser salvo em vários Boards.
+
+Um usuário não pode modificar o Board privado de outro usuário.
+
+### Autorização
+
+Toda operação protegida deve ser validada no backend.
+
+Não confiar apenas nas restrições da interface.
+
+---
+
+## 12. Entidades iniciais
+
+A modelagem inicial deve considerar:
+
+### User
+
+Possíveis campos:
+
+- id
+- username
+- email
+- passwordHash
+- displayName
+- bio
+- avatarUrl
+- createdAt
+- updatedAt
+
+### Board
+
+Possíveis campos:
+
+- id
+- name
+- description
+- isPrivate
+- coverImageUrl
+- userId
+- createdAt
+- updatedAt
+
+### Pin
+
+Possíveis campos:
+
+- id
+- title
+- description
+- imageUrl
+- sourceUrl
+- userId
+- createdAt
+- updatedAt
+
+### BoardPin
+
+Possíveis campos:
+
+- boardId
+- pinId
+- createdAt
+
+A modelagem definitiva deve ser discutida antes da implementação.
+
+---
+
+## 13. Relacionamentos iniciais
+
+User 1:N Board
+
+User 1:N Pin
+
+Board N:N Pin através de BoardPin
+
+Não criar inicialmente entidades como Like, Follow, Comment ou Tag sem que sejam necessárias para o módulo atual.
+
+---
+
+## 14. Autenticação
+
+A autenticação deverá utilizar:
+
+- Spring Security;
+- JWT;
+- hash seguro de senha, como BCrypt;
+- autorização baseada no usuário autenticado.
+
+Fluxo esperado:
+
+Cadastro
+→ senha armazenada com hash
+→ login
+→ autenticação
+→ JWT
+→ frontend utiliza o token nas requisições protegidas.
+
+Os detalhes da implementação devem ser analisados antes do código.
+
+---
+
+## 15. API inicial
+
+A API deverá seguir princípios REST e utilizar JSON.
+
+Grupos inicialmente previstos:
+
+### Auth
+
+POST /api/auth/register
+
+POST /api/auth/login
+
+### Users
+
+GET /api/users/me
+
+GET /api/users/{id}
+
+PUT /api/users/me
+
+### Boards
+
+POST /api/boards
+
+GET /api/boards
+
+GET /api/boards/{id}
+
+PUT /api/boards/{id}
+
+DELETE /api/boards/{id}
+
+### Pins
+
+POST /api/pins
+
+GET /api/pins/{id}
+
+PUT /api/pins/{id}
+
+DELETE /api/pins/{id}
+
+### Board Pins
+
+POST /api/boards/{boardId}/pins/{pinId}
+
+DELETE /api/boards/{boardId}/pins/{pinId}
+
+### Feed
+
+GET /api/feed
+
+### Search
+
+GET /api/search?q=
+
+Essa é uma proposta inicial.
+
+Os endpoints devem ser revisados antes de serem implementados.
+
+---
+
+## 16. Feed
+
+A primeira versão do feed NÃO utilizará inteligência artificial.
+
+A implementação inicial pode utilizar:
+
+- ordenação por data;
+- paginação;
+- Pins públicos.
+
+Exemplo:
+
+GET /api/feed?page=0&size=20
+
+Posteriormente o feed poderá incorporar:
+
+- Pins de usuários seguidos;
+- popularidade;
+- interesses do usuário;
+- similaridade;
+- recomendações;
+- machine learning.
+
+---
+
+## 17. Interface
+
+A identidade visual deve transmitir:
+
+- visual clean;
+- foco nas imagens;
+- estética moderna;
+- navegação simples;
+- sensação de inspiração e descoberta.
+
+O feed deverá utilizar um Masonry Grid responsivo.
+
+Telas iniciais:
+
+- Home;
+- Login;
+- Cadastro;
+- Feed;
+- Visualização de Pin;
+- Criar Pin;
+- Boards;
+- Visualização de Board;
+- Perfil;
+- Busca.
+
+Não copiar visualmente o Pinterest de forma literal.
+
+O Pinnie deve possuir identidade visual própria.
+
+---
+
+## 18. Upload de imagens
+
+Não armazenar arquivos de imagem diretamente no PostgreSQL.
+
+O banco deverá armazenar metadados e a referência da imagem.
+
+Durante o desenvolvimento:
+
+Frontend
+→ Backend
+→ armazenamento local
+
+Posteriormente:
+
+Frontend
+→ Backend
+→ object storage
+→ CDN
+
+O upload deverá considerar:
+
+- limite de tamanho;
+- validação de MIME type;
+- validação de extensão;
+- nomes de arquivos seguros;
+- tratamento de erros;
+- proteção contra arquivos maliciosos.
+
+---
+
+## 19. Banco de dados
+
+Utilizar PostgreSQL.
+
+Utilizar Flyway para migrações.
+
+Não depender da criação automática do schema pelo Hibernate para a estrutura definitiva.
+
+As migrations devem ser versionadas.
+
+Exemplo:
+
+V1__create_users.sql
+V2__create_boards.sql
+V3__create_pins.sql
+V4__create_board_pins.sql
+
+Não criar migrations desnecessárias antecipadamente.
+
+---
+
+## 20. Docker
+
+O projeto deverá futuramente permitir executar o ambiente com Docker Compose.
+
+Serviços iniciais:
+
+- backend;
+- frontend;
+- PostgreSQL.
+
+Durante o desenvolvimento, manter a infraestrutura simples.
+
+Não adicionar Redis, Kafka, Elasticsearch, Kubernetes ou outros componentes antes de existir uma necessidade real.
+
+---
+
+## 21. Testes
+
+Cada módulo deve ser testado antes de avançar.
+
+Backend:
+
+- testes unitários;
+- testes de integração;
+- testes de controllers;
+- testes de segurança;
+- testes de regras de negócio.
+
+Priorizar testes para:
+
+- cadastro;
+- login;
+- autorização;
+- criação de Board;
+- criação de Pin;
+- salvamento de Pin;
+- acesso a recursos privados;
+- validação de upload.
+
+---
+
+## 22. Swagger / OpenAPI
+
+A API deverá ser documentada com OpenAPI/Swagger.
+
+Documentar:
+
+- endpoints;
+- parâmetros;
+- request bodies;
+- responses;
+- códigos HTTP;
+- autenticação;
+- erros relevantes.
+
+A documentação deve acompanhar a evolução da API.
+
+---
+
+## 23. Segurança
+
+Considerar desde o início:
+
+- autenticação;
+- autorização;
+- BCrypt;
+- JWT;
+- CORS;
+- validação de entrada;
+- proteção contra SQL Injection;
+- proteção contra XSS;
+- validação de upload;
+- limites de tamanho;
+- rate limiting posteriormente;
+- controle de acesso por recurso;
+- não exposição de informações sensíveis;
+- tratamento seguro de erros.
+
+---
+
+## 24. Moderação
+
+Não é prioridade do primeiro MVP, mas deverá ser considerada para uma versão pública.
+
+Futuras funcionalidades:
+
+- denúncias;
+- bloqueios;
+- moderação;
+- painel administrativo.
+
+Possíveis motivos de denúncia:
+
+- spam;
+- conteúdo inadequado;
+- violação de direitos autorais;
+- conteúdo ilegal;
+- outro.
+
+---
+
+## 25. Direitos autorais
+
+Como o Pinnie trabalhará com imagens, considerar desde cedo:
+
+- origem da imagem;
+- sourceUrl;
+- atribuição;
+- denúncia;
+- remoção;
+- termos de uso;
+- política de privacidade;
+- responsabilidade do usuário pelo conteúdo enviado.
+
+Decisões jurídicas não devem ser inventadas pelo agente.
+
+Quando necessário, sinalizar que uma decisão precisa ser definida pela responsável pelo projeto.
+
+---
+
+## 26. Roadmap
+
+### Fase 0 — Planejamento
+
+- requisitos;
+- arquitetura;
+- banco;
+- API;
+- decisões técnicas.
+
+### Fase 1 — Inicialização
+
+- Git;
+- estrutura;
+- Spring Boot;
+- Vue;
+- Docker;
+- configuração.
+
+### Fase 2 — Backend base
+
+- PostgreSQL;
+- Flyway;
+- health check;
+- tratamento de erros;
+- configuração.
+
+### Fase 3 — Autenticação
+
+- User;
+- cadastro;
+- login;
+- JWT;
+- Spring Security;
+- autorização.
+
+### Fase 4 — Boards
+
+- CRUD;
+- permissões;
+- Boards públicos/privados.
+
+### Fase 5 — Pins
+
+- criação;
+- edição;
+- exclusão;
+- visualização.
+
+### Fase 6 — Imagens
+
+- upload;
+- armazenamento;
+- validações.
+
+### Fase 7 — Salvamento
+
+- BoardPin;
+- salvar;
+- remover;
+- listar Pins do Board.
+
+### Fase 8 — Feed
+
+- paginação;
+- ordenação;
+- Masonry.
+
+### Fase 9 — Frontend
+
+- layout;
+- autenticação;
+- feed;
+- Boards;
+- Pin;
+- perfil.
+
+### Fase 10 — Busca
+
+- busca textual;
+- filtros básicos.
+
+### Fase 11 — Social
+
+- likes;
+- follows;
+- comentários.
+
+### Fase 12 — Qualidade
+
+- testes;
+- segurança;
+- documentação;
+- Docker;
+- CI/CD.
+
+### Fase 13 — Deploy
+
+- domínio;
+- HTTPS;
+- ambiente de produção;
+- storage externo.
+
+### Fase 14 — Moderação
+
+- denúncias;
+- bloqueios;
+- painel administrativo.
+
+### Fase 15 — Recomendação
+
+- interesses;
+- similaridade;
+- ranking;
+- personalização.
+
+### Fase 16 — IA
+
+- classificação de imagens;
+- geração de tags;
+- busca semântica;
+- recomendação multimodal.
+
+---
+
+## 27. Regra para o início do projeto
+
+O projeto está atualmente no início.
+
+A primeira tarefa do agente é SOMENTE análise.
+
+Não criar código de backend ou frontend.
+
+Não instalar dependências.
+
+Não criar entidades ainda.
+
+Não inicializar Spring Boot.
+
+Não inicializar Vue.
+
+Não alterar o projeto.
+
+Primeiro apresentar:
+
+1. avaliação da proposta do Pinnie;
+2. revisão da arquitetura;
+3. revisão da stack;
+4. proposta de estrutura de diretórios;
+5. entidades iniciais;
+6. relacionamentos;
+7. proposta de API;
+8. estratégia de autenticação;
+9. estratégia para imagens;
+10. estratégia de testes;
+11. riscos técnicos;
+12. possíveis melhorias;
+13. plano detalhado do primeiro módulo de implementação.
+
+Depois da análise, aguardar aprovação explícita.
+
+---
+
+## 28. Instrução final
+
+Você é o agente de desenvolvimento do Pinnie.
+
+Seu papel é atuar como parceiro técnico e mentor de desenvolvimento, e não simplesmente gerar todo o projeto automaticamente.
+
+Siga rigorosamente:
+
+ANALISAR
+→ EXPLICAR
+→ AGUARDAR APROVAÇÃO
+→ IMPLEMENTAR
+→ TESTAR
+→ DOCUMENTAR
+→ AGUARDAR PRÓXIMA TAREFA
+
+Não pule etapas.
+
+Não implemente funcionalidades não solicitadas.
+
+Não faça grandes refatorações sem aprovação.
+
+Quando houver uma decisão arquitetural relevante, explique antes de implementá-la.
+
+O objetivo não é apenas fazer o Pinnie funcionar.
+
+O objetivo é construir um software bem arquitetado, seguro, testável, documentado e compreensível pela desenvolvedora.
