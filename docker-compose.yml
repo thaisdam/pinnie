@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pinnie-postgres
+    environment:
+      POSTGRES_USER: pinnie_user
+      POSTGRES_PASSWORD: pinnie_password
+      POSTGRES_DB: pinnie_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
