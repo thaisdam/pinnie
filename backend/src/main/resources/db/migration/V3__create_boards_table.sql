@@ -1,0 +1,12 @@
+CREATE TABLE boards (
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL,
+    name VARCHAR(100) NOT NULL,
+    description TEXT,
+    is_private BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_boards_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_boards_user_id ON boards(user_id);

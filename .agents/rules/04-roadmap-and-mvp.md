@@ -26,16 +26,14 @@
 ## 2. Roadmap Completo do Projeto
 
 - **Fase 0 — Planejamento:** Requisitos, arquitetura, modelo de dados e API.
-- **Fase 1 — Inicialização:** Git, estrutura de arquivos, Spring Boot, Docker. *(Concluída)*
-- **Fase 2 — Backend Base:** PostgreSQL, Flyway, Health Check. *(Concluída)*
-- **Fase 3 — Autenticação & Usuários:** Entidade User, BCrypt, JWT HttpOnly, CSRF, Spring Security. *(Concluída)*
-- **Fase 4 — Boards:** CRUD de Painéis e controle de visibilidade.
-- **Fase 5 — Pins:** CRUD de Pins e visualização de conteúdo.
-- **Fase 6 — Imagens:** Upload de arquivos e servir recursos estáticos.
-- **Fase 7 — Salvamento:** Relacionamento BoardPin, salvar e remover Pins de Boards.
-- **Fase 8 — Feed:** Paginação, ordenação e exibição no Masonry Grid.
-- **Fase 9 — Frontend (Vue 3):** Layout, roteamento, estado (Pinia), consumo da API com Axios.
-- **Fase 10 — Busca:** Busca textual e filtros por palavra-chave.
+- **Fase 1 (Módulo 1) — Inicialização:** Git, estrutura de arquivos, Spring Boot, Docker. *(Concluída)*
+- **Fase 2 (Módulo 2) — Backend Base & User/Auth:** PostgreSQL, Flyway, User, Auth, JWT. *(Concluída)*
+- **Fase 3 (Módulo 3) — Boards:** CRUD de Painéis e controle de visibilidade.
+- **Fase 4 (Módulo 4) — Pins e Imagens:** CRUD de Pins e upload de imagens (estáticos).
+- **Fase 5 (Módulo 5) — Salvar Pins em Boards:** Relacionamento BoardPin, salvar e remover Pins de Boards.
+- **Fase 6 (Módulo 6) — Feed:** Paginação, ordenação e exibição no Masonry Grid.
+- **Fase 7 — Frontend (Vue 3):** Layout, roteamento, estado (Pinia), consumo da API com Axios.
+- **Fase 8 — Busca:** Busca textual e filtros por palavra-chave.
 - **Fase 11 — Social:** Likes, Follows e Comentários (Pós-MVP).
 - **Fase 12 — Qualidade:** Testes completos, segurança refinada e documentação final.
 - **Fase 13 — Deploy:** Ambiente de Produção, HTTPS e Object Storage externo.

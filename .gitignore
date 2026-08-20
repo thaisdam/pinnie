@@ -30,3 +30,4 @@ Thumbs.db
 # Documentação interna
 walkthrough.md
 implementation_plan.md
+.agents/rules/*.txt
