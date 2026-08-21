@@ -32,8 +32,8 @@
 - **Fase 4 (Módulo 4) — Pins e Imagens:** CRUD de Pins e upload de imagens (estáticos).
 - **Fase 5 (Módulo 5) — Salvar Pins em Boards:** Relacionamento BoardPin, salvar e remover Pins de Boards.
 - **Fase 6 (Módulo 6) — Feed:** Paginação, ordenação e exibição no Masonry Grid.
-- **Fase 7 — Frontend (Vue 3):** Layout, roteamento, estado (Pinia), consumo da API com Axios.
-- **Fase 8 — Busca:** Busca textual e filtros por palavra-chave.
+- **Fase 7 (Módulo 7) — Busca:** Busca textual e filtros por palavra-chave.
+- **Fase 8 (Módulo 8) — Frontend (Vue 3):** Layout, roteamento, estado (Pinia), consumo da API com Axios.
 - **Fase 11 — Social:** Likes, Follows e Comentários (Pós-MVP).
 - **Fase 12 — Qualidade:** Testes completos, segurança refinada e documentação final.
 - **Fase 13 — Deploy:** Ambiente de Produção, HTTPS e Object Storage externo.

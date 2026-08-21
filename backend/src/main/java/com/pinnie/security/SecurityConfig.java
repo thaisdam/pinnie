@@ -53,6 +53,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/csrf").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feed").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/search").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterAfter(csrfCookieFilter, BasicAuthenticationFilter.class)
