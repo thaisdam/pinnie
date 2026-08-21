@@ -52,6 +52,7 @@ public class SecurityConfig {
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/csrf").permitAll()
+                .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feed").permitAll()
                 .anyRequest().authenticated()
             )
             .addFilterAfter(csrfCookieFilter, BasicAuthenticationFilter.class)
