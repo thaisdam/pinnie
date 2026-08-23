@@ -34,9 +34,11 @@
 - **Fase 6 (Módulo 6) — Feed:** Paginação, ordenação e exibição no Masonry Grid.
 - **Fase 7 (Módulo 7) — Busca:** Busca textual e filtros por palavra-chave.
 - **Fase 8 (Módulo 8) — Frontend (Vue 3):** Layout, roteamento, estado (Pinia), consumo da API com Axios.
-- **Fase 11 — Social:** Likes, Follows e Comentários (Pós-MVP).
-- **Fase 12 — Qualidade:** Testes completos, segurança refinada e documentação final.
-- **Fase 13 — Deploy:** Ambiente de Produção, HTTPS e Object Storage externo.
-- **Fase 14 — Moderação:** Denúncias, bloqueios e painel administrativo.
-- **Fase 15 — Recomendação:** Algoritmos de recomendação e personalização.
-- **Fase 16 — IA:** Classificação de imagens e busca semântica multimodal.
+- **Fase 9 (Módulo 9) — Frontend Auth UI:** Telas de Login e Registro, formulários e integração JWT com backend.
+- **Fase 10 (Módulo 10) — Frontend Core UI:** Home/Feed (Masonry Grid), Upload de Pins, criação e exibição de Boards.
+- **Fase 11 (Módulo 11) — Social:** Likes, Follows e Comentários (Pós-MVP).
+- **Fase 12 (Módulo 12) — Qualidade:** Testes completos, segurança refinada e documentação final.
+- **Fase 13 (Módulo 13) — Deploy:** Ambiente de Produção, HTTPS e Object Storage externo.
+- **Fase 14 (Módulo 14) — Moderação:** Denúncias, bloqueios e painel administrativo.
+- **Fase 15 (Módulo 15) — Recomendação:** Algoritmos de recomendação e personalização.
+- **Fase 16 (Módulo 16) — IA:** Classificação de imagens e busca semântica multimodal.
