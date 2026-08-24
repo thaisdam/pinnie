@@ -12,6 +12,8 @@
         <router-link to="/" class="nav-link">Home</router-link>
         
         <template v-if="authStore.isAuthenticated">
+          <router-link to="/boards" class="nav-link">Minhas Pastas</router-link>
+          <router-link to="/pin/create" class="nav-link">Criar Pin</router-link>
           <span class="nav-user">Olá, {{ authStore.user?.displayName }}</span>
           <button @click="handleLogout" class="btn-logout" :disabled="authStore.loading">
             Sair

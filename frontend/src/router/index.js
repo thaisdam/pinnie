@@ -14,6 +14,18 @@ const router = createRouter({
       component: HomeView
     },
     {
+      path: '/pin/create',
+      name: 'pin-create',
+      component: () => import('../views/PinCreateView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
+      path: '/boards',
+      name: 'boards',
+      component: () => import('../views/BoardsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/pin/:id',
       name: 'pin-detail',
       component: () => import('../views/PinView.vue')
@@ -42,12 +54,11 @@ router.beforeEach((to, from, next) => {
     if (to.meta.requiresGuest && authStore.isAuthenticated) {
       next({ name: 'home' });
     } 
-    // Futuro: se a rota exige autenticação (requiresAuth) e o usuário não estiver logado, manda pro login
-    // else if (to.meta.requiresAuth && !authStore.isAuthenticated) {
-    //   next({ name: 'login' });
-    // } 
+    else if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+      next({ name: 'login' });
+    } 
     else {
-      next(); // Tudo certo, pode passar
+      next();
     }
   };
 
