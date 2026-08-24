@@ -3,6 +3,18 @@
     <header class="app-header">
       <router-link to="/" class="app-logo">Pinnie</router-link>
       
+      <div class="search-bar-wrapper">
+        <form @submit.prevent="handleSearch" class="search-form">
+          <span class="search-icon">🔍</span>
+          <input 
+            type="search" 
+            v-model="searchQuery" 
+            placeholder="Pesquisar..." 
+            class="search-input"
+          />
+        </form>
+      </div>
+
       <!-- Evita mostrar opções incorretas enquanto verifica sessão -->
       <nav v-if="authStore.isInitializing" class="app-nav">
         <!-- Espaço discreto -->
@@ -34,12 +46,31 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
-import { useRouter } from 'vue-router';
+import { onMounted, ref, watch } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from './stores/auth';
 
 const router = useRouter();
+const route = useRoute();
 const authStore = useAuthStore();
+
+const searchQuery = ref('');
+
+// Mantém o input atualizado com a URL caso o usuário recarregue a página
+watch(() => route.query.q, (newQ) => {
+  if (newQ) {
+    searchQuery.value = newQ;
+  } else if (route.name !== 'search') {
+    searchQuery.value = '';
+  }
+});
+
+const handleSearch = () => {
+  const q = searchQuery.value.trim();
+  if (q.length >= 2) {
+    router.push({ name: 'search', query: { q } });
+  }
+};
 
 // Dispara a verificação da sessão assim que a aplicação é montada no navegador
 onMounted(() => {
@@ -53,6 +84,53 @@ const handleLogout = async () => {
 </script>
 
 <style scoped>
+/* Search Bar Styles */
+.search-bar-wrapper {
+  flex: 1;
+  max-width: 800px;
+  margin: 0 var(--spacing-lg);
+  display: flex;
+  align-items: center;
+}
+
+.search-form {
+  display: flex;
+  align-items: center;
+  background-color: var(--color-surface);
+  border-radius: 24px;
+  padding: 8px 16px;
+  width: 100%;
+  border: 1px solid transparent;
+  transition: all var(--transition-fast);
+}
+
+.search-form:focus-within {
+  border-color: var(--color-primary);
+  background-color: var(--color-background);
+  box-shadow: 0 0 0 4px rgba(230, 0, 35, 0.1);
+}
+
+.search-icon {
+  font-size: 1.1rem;
+  color: var(--color-text-light);
+  margin-right: 8px;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  outline: none;
+  font-size: 1rem;
+  color: var(--color-text);
+  font-family: inherit;
+}
+
+.search-input::placeholder {
+  color: var(--color-text-light);
+}
+
+/* Nav & Auth Styles */
 .nav-user {
   font-weight: 600;
   color: var(--color-text);

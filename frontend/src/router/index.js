@@ -31,6 +31,11 @@ const router = createRouter({
       component: () => import('../views/BoardDetailView.vue')
     },
     {
+      path: '/search',
+      name: 'search',
+      component: () => import('../views/SearchView.vue')
+    },
+    {
       path: '/pin/:id',
       name: 'pin-detail',
       component: () => import('../views/PinView.vue')
