@@ -1,7 +1,9 @@
 <template>
   <div class="app-wrapper">
     <header class="app-header">
-      <router-link to="/" class="app-logo">Pinnie</router-link>
+      <div class="logo-wrapper">
+        <router-link to="/" class="app-logo">Pinnie</router-link>
+      </div>
       
       <div class="search-bar-wrapper">
         <form @submit.prevent="handleSearch" class="search-form">
@@ -133,10 +135,14 @@ const handleLogout = async () => {
 /* Nav & Auth Styles */
 .app-logo {
   font-family: 'Emilys Candy', cursive;
-  font-size: 1.5rem;
+  font-size: 1.8rem;
   font-weight: 700;
   color: var(--color-primary);
   letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  text-decoration: none;
 }
 
 .app-nav {
