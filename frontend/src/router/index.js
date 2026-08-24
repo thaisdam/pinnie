@@ -26,6 +26,11 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/boards/:id',
+      name: 'board-detail',
+      component: () => import('../views/BoardDetailView.vue')
+    },
+    {
       path: '/pin/:id',
       name: 'pin-detail',
       component: () => import('../views/PinView.vue')

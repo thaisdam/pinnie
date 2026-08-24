@@ -37,7 +37,24 @@
         <!-- Direita: Informações -->
         <div class="pin-info-col">
           <div class="pin-actions">
-            <!-- Futuro botão salvar pode entrar aqui -->
+            <!-- Funcionalidade Salvar (Apenas logados) -->
+            <div class="save-wrapper" v-if="authStore.isAuthenticated">
+              <select v-model="selectedBoardId" class="board-select">
+                <option disabled value="">Selecione a Pasta</option>
+                <option v-for="board in myBoards" :key="board.id" :value="board.id">
+                  {{ board.name }}
+                </option>
+              </select>
+              <button 
+                class="btn-save" 
+                @click="savePinToBoard" 
+                :disabled="isSaving || !selectedBoardId || isSaved"
+                :class="{'btn-saved': isSaved}"
+              >
+                {{ saveStatusText }}
+              </button>
+            </div>
+            <p v-if="saveError" class="save-error">{{ saveError }}</p>
           </div>
           
           <h1 v-if="pin.title" class="pin-title">{{ pin.title }}</h1>
@@ -67,20 +84,64 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 
 const route = useRoute();
 const pinId = route.params.id;
+const authStore = useAuthStore();
 
 const pin = ref(null);
 const isLoading = ref(true);
 const error = ref(null);
+
+// Lógica de Salvar Pin
+const myBoards = ref([]);
+const selectedBoardId = ref('');
+const isSaving = ref(false);
+const isSaved = ref(false);
+const saveError = ref('');
+
+const saveStatusText = computed(() => {
+  if (isSaved.value) return 'Salvo!';
+  if (isSaving.value) return 'Salvando...';
+  return 'Salvar';
+});
 
 const fullImageUrl = computed(() => {
   if (!pin.value) return '';
   const baseUrl = import.meta.env.VITE_BACKEND_URL || '';
   return `${baseUrl}${pin.value.imageUrl}`;
 });
+
+const fetchMyBoards = async () => {
+  if (!authStore.isAuthenticated || !authStore.user) return;
+  try {
+    const response = await api.get(`/users/${authStore.user.id}/boards?size=100`);
+    myBoards.value = response.data.content;
+    if (myBoards.value.length > 0) {
+      selectedBoardId.value = myBoards.value[0].id;
+    }
+  } catch (err) {
+    console.error('Erro ao buscar as pastas do usuario:', err);
+  }
+};
+
+const savePinToBoard = async () => {
+  if (!selectedBoardId.value) return;
+  
+  isSaving.value = true;
+  saveError.value = '';
+  try {
+    await api.post(`/boards/${selectedBoardId.value}/pins/${pinId}`);
+    isSaved.value = true;
+  } catch (err) {
+    console.error('Erro ao salvar pin:', err);
+    saveError.value = 'Não foi possível salvar (talvez já esteja nesta pasta).';
+  } finally {
+    isSaving.value = false;
+  }
+};
 
 const fetchPin = async () => {
   isLoading.value = true;
@@ -102,6 +163,7 @@ const fetchPin = async () => {
 
 onMounted(() => {
   fetchPin();
+  fetchMyBoards();
 });
 </script>
 
@@ -211,6 +273,65 @@ onMounted(() => {
   flex-direction: column;
   gap: var(--spacing-md);
   max-width: 500px;
+}
+
+/* Save Component */
+.pin-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.save-wrapper {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  background-color: var(--color-background);
+  padding: 8px;
+  border-radius: 30px;
+  border: 1px solid var(--color-border);
+}
+
+.board-select {
+  flex: 1;
+  padding: 8px;
+  border: none;
+  background-color: transparent;
+  font-family: inherit;
+  font-weight: 600;
+  outline: none;
+  cursor: pointer;
+}
+
+.btn-save {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 10px 24px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-save:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-save:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-save.btn-saved {
+  background-color: #222;
+  opacity: 1;
+}
+
+.save-error {
+  color: var(--color-primary);
+  font-size: 0.75rem;
+  margin-top: -4px;
 }
 
 /* Typography & Info */

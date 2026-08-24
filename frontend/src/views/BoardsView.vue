@@ -72,13 +72,18 @@
     </div>
 
     <div v-else class="boards-grid">
-      <div v-for="board in boards" :key="board.id" class="board-card">
+      <router-link 
+        v-for="board in boards" 
+        :key="board.id" 
+        :to="'/boards/' + board.id"
+        class="board-card"
+      >
         <div class="board-header">
           <h3 class="board-title">{{ board.name }}</h3>
           <span v-if="board.isPrivate" class="private-icon" title="Pasta Privada">🔒</span>
         </div>
         <p class="board-desc">{{ board.description || 'Sem descrição' }}</p>
-      </div>
+      </router-link>
     </div>
 
   </main>
@@ -303,6 +308,8 @@ input[type="text"], textarea {
   flex-direction: column;
   transition: transform var(--transition-fast), box-shadow var(--transition-fast);
   cursor: pointer;
+  text-decoration: none;
+  color: inherit;
 }
 
 .board-card:hover {
