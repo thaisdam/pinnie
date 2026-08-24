@@ -24,7 +24,7 @@
             <img v-if="imagePreview" :src="imagePreview" alt="Preview" class="preview-image" />
             
             <div v-else class="upload-placeholder">
-              <span class="upload-icon">↑</span>
+              <i class="ph ph-upload-simple upload-icon"></i>
               <p>Clique ou arraste uma imagem aqui</p>
               <span class="upload-hint">Recomendamos usar arquivos .jpg ou .png de alta qualidade.</span>
             </div>

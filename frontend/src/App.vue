@@ -5,7 +5,7 @@
       
       <div class="search-bar-wrapper">
         <form @submit.prevent="handleSearch" class="search-form">
-          <span class="search-icon">🔍</span>
+          <i class="ph ph-magnifying-glass search-icon"></i>
           <input 
             type="search" 
             v-model="searchQuery" 
@@ -131,6 +131,31 @@ const handleLogout = async () => {
 }
 
 /* Nav & Auth Styles */
+.app-logo {
+  font-family: 'Emilys Candy', cursive;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
+}
+
+.app-nav {
+  display: flex;
+  gap: var(--spacing-md);
+}
+
+.nav-link {
+  font-weight: 600;
+  color: var(--color-text);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-radius: var(--border-radius);
+  transition: background-color var(--transition-fast);
+}
+
+.nav-link:hover, .nav-link.router-link-active {
+  background-color: var(--color-surface);
+}
+
 .nav-user {
   font-weight: 600;
   color: var(--color-text);

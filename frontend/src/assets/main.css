@@ -6,7 +6,7 @@
 }
 
 :root {
-  /* Colors */
+  /* Colors - Original Pinnie */
   --color-background: #ffffff;
   --color-surface: #f9f9f9;
   --color-text: #111111;
@@ -16,19 +16,22 @@
   --color-border: #efefef;
 
   /* Typography */
-  --font-family: 'Inter', 'Roboto', sans-serif;
+  --font-family: 'IBM Plex Sans', sans-serif;
   
   /* Layout */
-  --border-radius: 16px;
+  --border-radius: 20px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
   
-  /* Shadows & Transitions */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  /* Shadows & Glassmorphism Transitions */
+  --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.1);
+  --shadow-hover: 0 15px 35px rgba(0, 0, 0, 0.15);
   --transition-fast: 0.2s ease;
+  --glass-bg: rgba(255, 255, 255, 0.9);
+  --glass-border: 1px solid rgba(239, 239, 239, 0.5);
 }
 
 body {
@@ -66,11 +69,14 @@ button {
   align-items: center;
   justify-content: space-between;
   padding: var(--spacing-md) var(--spacing-lg);
-  background-color: var(--color-background);
-  border-bottom: 1px solid var(--color-border);
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: var(--glass-border);
   position: sticky;
   top: 0;
   z-index: 100;
+  box-shadow: var(--shadow-sm);
 }
 
 .app-logo {

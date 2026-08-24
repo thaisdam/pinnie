@@ -3,7 +3,7 @@
     
     <!-- Cabeçalho da Pasta -->
     <header class="board-header" v-if="board">
-      <h1 class="page-title">{{ board.name }} <span v-if="board.isPrivate" title="Privada">🔒</span></h1>
+      <h1 class="page-title">{{ board.name }} <i v-if="board.isPrivate" class="ph-fill ph-lock-key" title="Privada"></i></h1>
       <p class="board-desc" v-if="board.description">{{ board.description }}</p>
     </header>
 

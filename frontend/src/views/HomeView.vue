@@ -14,7 +14,6 @@
       <button class="retry-btn" @click="feedStore.fetchFeed">Tentar novamente</button>
     </div>
 
-    <!-- Empty State -->
     <div v-else-if="!feedStore.isLoading && feedStore.pins.length === 0" class="empty-state">
       <h2>Ainda não há nada aqui.</h2>
       <p>Seja o primeiro a adicionar inspirações ao Pinnie!</p>

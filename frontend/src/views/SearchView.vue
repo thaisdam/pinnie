@@ -22,7 +22,7 @@
 
     <!-- Empty State -->
     <div v-else-if="!isLoading && pins.length === 0" class="state-container empty-state">
-      <h2>Não encontramos nada 😢</h2>
+      <h2>Não encontramos nada <i class="ph ph-smiley-sad"></i></h2>
       <p>Tente usar palavras mais genéricas para a busca "<strong>{{ currentQuery }}</strong>".</p>
       <router-link to="/" class="btn-primary">Voltar ao Feed</router-link>
     </div>

@@ -80,7 +80,7 @@
       >
         <div class="board-header">
           <h3 class="board-title">{{ board.name }}</h3>
-          <span v-if="board.isPrivate" class="private-icon" title="Pasta Privada">🔒</span>
+          <i v-if="board.isPrivate" class="ph-fill ph-lock-key private-icon" title="Pasta Privada"></i>
         </div>
         <p class="board-desc">{{ board.description || 'Sem descrição' }}</p>
       </router-link>
@@ -315,6 +315,7 @@ input[type="text"], textarea {
 .board-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-sm);
+  background-color: var(--color-surface-hover);
 }
 
 .board-header {
