@@ -20,27 +20,65 @@
       <p>Seja o primeiro a adicionar inspirações ao Pinnie!</p>
     </div>
 
-    <!-- Content State (Masonry Grid) -->
-    <div v-else class="masonry-grid">
-      <PinCard 
-        v-for="pin in feedStore.pins" 
-        :key="pin.id" 
-        :pin="pin" 
-      />
+    <!-- Content State (Masonry Grid e Scroll Infinito) -->
+    <div v-else class="content-state">
+      <div class="masonry-grid">
+        <PinCard 
+          v-for="pin in feedStore.pins" 
+          :key="pin.id" 
+          :pin="pin" 
+        />
+      </div>
+
+      <!-- Gatilho do Scroll Infinito -->
+      <div ref="bottomTrigger" class="infinite-scroll-trigger"></div>
+
+      <!-- Loading Adicional Discreto -->
+      <div v-if="feedStore.isLoading && feedStore.pins.length > 0" class="loading-more">
+        <div class="loader loader-small"></div>
+      </div>
+
+      <!-- Fim do Feed -->
+      <div v-if="!feedStore.hasNext && feedStore.pins.length > 0" class="end-of-feed">
+        <p>Você chegou ao fim das inspirações</p>
+      </div>
     </div>
 
   </main>
 </template>
 
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, onUnmounted, ref } from 'vue';
 import { useFeedStore } from '../stores/feed';
 import PinCard from '../components/PinCard.vue';
 
 const feedStore = useFeedStore();
+const bottomTrigger = ref(null);
+let observer = null;
 
-onMounted(() => {
-  feedStore.fetchFeed();
+onMounted(async () => {
+  // Carga inicial
+  await feedStore.fetchFeed();
+
+  // Configurar IntersectionObserver
+  observer = new IntersectionObserver((entries) => {
+    const target = entries[0];
+    if (target.isIntersecting && !feedStore.isLoading && feedStore.hasNext) {
+      feedStore.loadMore();
+    }
+  }, {
+    rootMargin: '100px'
+  });
+
+  if (bottomTrigger.value) {
+    observer.observe(bottomTrigger.value);
+  }
+});
+
+onUnmounted(() => {
+  if (observer) {
+    observer.disconnect();
+  }
 });
 </script>
 
@@ -110,5 +148,31 @@ onMounted(() => {
 
 .retry-btn:hover {
   background-color: #efefef;
+}
+
+/* Infinite Scroll e Estados Finais */
+.infinite-scroll-trigger {
+  height: 20px;
+  width: 100%;
+}
+
+.loading-more {
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-md) 0 var(--spacing-xl) 0;
+}
+
+.loader-small {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+.end-of-feed {
+  text-align: center;
+  padding: var(--spacing-lg) 0 var(--spacing-xl) 0;
+  color: var(--color-text-light);
+  font-weight: 500;
+  font-size: 0.9rem;
 }
 </style>
