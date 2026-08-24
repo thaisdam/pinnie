@@ -1,5 +1,5 @@
 <template>
-  <div class="pin-card-wrapper">
+  <router-link :to="'/pin/' + pin.id" class="pin-card-wrapper">
     <div class="pin-card">
       <div class="image-container" :class="{ 'has-error': imageError }">
         <img 
@@ -19,7 +19,7 @@
         <h3 class="pin-title">{{ pin.title }}</h3>
       </div>
     </div>
-  </div>
+  </router-link>
 </template>
 
 <script setup>
@@ -48,6 +48,8 @@ function handleImageError() {
 .pin-card-wrapper {
   break-inside: avoid;
   margin-bottom: var(--spacing-md);
+  display: block; /* pois router-link rendered as <a> is inline by default */
+  cursor: zoom-in;
 }
 
 .pin-card {
