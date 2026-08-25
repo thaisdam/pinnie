@@ -2,15 +2,20 @@ package com.pinnie.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Requisição para atualização de uma Pasta")
 public class BoardUpdateRequestDTO {
 
+    @Schema(description = "Nome da pasta", example = "Receitas Editadas", maxLength = 100, requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "Name cannot be blank")
     @Size(max = 100, message = "Name must not exceed 100 characters")
     private String name;
 
+    @Schema(description = "Descrição opcional da pasta", example = "Minhas receitas favoritas atualizadas")
     private String description;
 
+    @Schema(description = "Define se a pasta é privada (apenas o dono pode ver) ou pública", example = "true")
     private boolean isPrivate;
 
     public BoardUpdateRequestDTO() {}

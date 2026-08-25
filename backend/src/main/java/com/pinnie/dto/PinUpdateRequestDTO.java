@@ -2,18 +2,24 @@ package com.pinnie.dto;
 
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Requisição para atualização de um Pin existente")
 public class PinUpdateRequestDTO {
 
+    @Schema(description = "Título do Pin", example = "Receita de Bolo Editada", maxLength = 100)
     @Size(max = 100, message = "Title must not exceed 100 characters")
     private String title;
 
+    @Schema(description = "Descrição detalhada do Pin")
     private String description;
 
+    @Schema(description = "Link de destino (opcional)", example = "https://meublog.com/bolo-editado")
     @Pattern(regexp = "^(https?://.*)?$", message = "Link must be a valid HTTP/HTTPS URL or empty")
     @Size(max = 2048, message = "Link must not exceed 2048 characters")
     private String link;
 
+    @Schema(description = "Texto alternativo para acessibilidade", maxLength = 255)
     @Size(max = 255, message = "Alt text must not exceed 255 characters")
     private String altText;
 

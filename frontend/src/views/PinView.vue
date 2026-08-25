@@ -73,6 +73,45 @@
               <span class="creator-id">Usuário do Pinnie</span>
             </div>
           </div>
+          
+          <!-- Seção de Comentários -->
+          <div class="comments-section">
+            <h2>Comentários</h2>
+            
+            <div v-if="authStore.isAuthenticated" class="comment-form">
+              <textarea 
+                v-model="newCommentText" 
+                maxlength="500" 
+                placeholder="Adicione um comentário..."
+                :disabled="isSubmittingComment"
+              ></textarea>
+              <div class="form-footer">
+                <span class="char-count">{{ newCommentText.length }}/500</span>
+                <button class="btn-submit" @click="submitComment" :disabled="isSubmittingComment || !newCommentText.trim()">
+                  {{ isSubmittingComment ? 'Enviando...' : 'Comentar' }}
+                </button>
+              </div>
+            </div>
+            
+            <div class="comments-list">
+              <CommentItem 
+                v-for="comment in comments" 
+                :key="comment.id" 
+                :comment="comment" 
+                :pinOwnerId="pin.userId || ''"
+                @delete="deleteComment" 
+              />
+              
+              <div v-if="comments.length === 0 && !isLoadingComments" class="no-comments">
+                Ainda não há comentários.
+              </div>
+              
+              <button v-if="hasMoreComments" class="btn-load-more" @click="loadMoreComments" :disabled="isLoadingComments">
+                {{ isLoadingComments ? 'Carregando...' : 'Carregar mais' }}
+              </button>
+            </div>
+          </div>
+
         </div>
 
       </div>
@@ -86,6 +125,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
+import CommentItem from '../components/CommentItem.vue';
 
 const route = useRoute();
 const pinId = route.params.id;
@@ -161,9 +201,74 @@ const fetchPin = async () => {
   }
 };
 
+// --- Lógica de Comentários ---
+const comments = ref([]);
+const newCommentText = ref('');
+const isSubmittingComment = ref(false);
+const isLoadingComments = ref(false);
+const currentPage = ref(0);
+const hasMoreComments = ref(false);
+
+const fetchComments = async (page = 0, append = false) => {
+  isLoadingComments.value = true;
+  try {
+    const response = await api.get(`/pins/${pinId}/comments?page=${page}&size=5`);
+    if (append) {
+      comments.value = [...comments.value, ...response.data.content];
+    } else {
+      comments.value = response.data.content;
+    }
+    hasMoreComments.value = !response.data.last;
+    currentPage.value = page;
+  } catch (err) {
+    console.error('Erro ao carregar comentários:', err);
+  } finally {
+    isLoadingComments.value = false;
+  }
+};
+
+const loadMoreComments = () => {
+  if (!isLoadingComments.value && hasMoreComments.value) {
+    fetchComments(currentPage.value + 1, true);
+  }
+};
+
+const submitComment = async () => {
+  if (!newCommentText.value.trim() || isSubmittingComment.value) return;
+  
+  isSubmittingComment.value = true;
+  try {
+    await api.post(`/pins/${pinId}/comments`, {
+      text: newCommentText.value.trim()
+    });
+    // Limpa o formulário e recarrega os comentários do zero (sem optimistic update)
+    newCommentText.value = '';
+    await fetchComments(0, false);
+  } catch (err) {
+    console.error('Erro ao enviar comentário:', err);
+    alert('Erro ao enviar comentário');
+  } finally {
+    isSubmittingComment.value = false;
+  }
+};
+
+const deleteComment = async (commentId) => {
+  if (!confirm('Deseja realmente excluir este comentário?')) return;
+  
+  try {
+    await api.delete(`/pins/${pinId}/comments/${commentId}`);
+    // Recarrega os comentários do zero (sem optimistic update)
+    await fetchComments(0, false);
+  } catch (err) {
+    console.error('Erro ao excluir comentário:', err);
+    alert('Erro ao excluir comentário');
+  }
+};
+
 onMounted(() => {
   fetchPin();
   fetchMyBoards();
+  fetchComments(0, false);
 });
 </script>
 
@@ -394,5 +499,96 @@ onMounted(() => {
 .creator-id {
   font-weight: 600;
   color: var(--color-text);
+}
+
+/* Comments Section */
+.comments-section {
+  margin-top: var(--spacing-xl);
+  border-top: 1px solid var(--color-border);
+  padding-top: var(--spacing-md);
+}
+
+.comments-section h2 {
+  font-size: 1.2rem;
+  margin-bottom: var(--spacing-md);
+  font-weight: 700;
+}
+
+.comment-form {
+  margin-bottom: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.comment-form textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: var(--border-radius);
+  padding: var(--spacing-sm);
+  font-family: inherit;
+  resize: vertical;
+  min-height: 80px;
+  background-color: var(--color-surface);
+  color: var(--color-text);
+}
+
+.form-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.char-count {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.btn-submit {
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-submit:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.no-comments {
+  color: var(--color-text-light);
+  font-style: italic;
+  font-size: 0.9rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.btn-load-more {
+  width: 100%;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-text);
+  transition: background-color var(--transition-fast);
+}
+
+.btn-load-more:hover:not(:disabled) {
+  background-color: #efefef;
+}
+
+.btn-load-more:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 </style>

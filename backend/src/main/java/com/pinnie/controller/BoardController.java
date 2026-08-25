@@ -18,10 +18,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/boards")
+@Tag(name = "Boards", description = "Endpoints para gerenciamento de pastas")
 public class BoardController {
 
     private final BoardService boardService;
@@ -31,8 +38,14 @@ public class BoardController {
     }
 
     @PostMapping
+    @Operation(summary = "Criar nova pasta", description = "Cria uma nova pasta associada ao usuário autenticado.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Pasta criada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "401", description = "Não autenticado")
+    })
     public ResponseEntity<BoardResponseDTO> createBoard(
-            @AuthenticationPrincipal UserDetails currentUser,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails currentUser,
             @Valid @RequestBody BoardCreateRequestDTO request) {
         UUID requesterId = UUID.fromString(currentUser.getUsername());
         BoardResponseDTO response = boardService.createBoard(requesterId, request);
@@ -40,18 +53,29 @@ public class BoardController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "Consultar pasta", description = "Retorna os dados da pasta. Retorna 404 se a pasta for privada e o solicitante não for o dono.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pasta retornada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Pasta não encontrada ou acesso negado (privada)")
+    })
     public ResponseEntity<BoardResponseDTO> getBoard(
-            @AuthenticationPrincipal UserDetails currentUser,
-            @PathVariable UUID id) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails currentUser,
+            @Parameter(description = "ID da pasta") @PathVariable UUID id) {
         UUID requesterId = currentUser != null ? UUID.fromString(currentUser.getUsername()) : null;
         BoardResponseDTO response = boardService.getBoardById(id, requesterId);
         return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
+    @Operation(summary = "Atualizar pasta", description = "Atualiza os dados de uma pasta. Apenas o dono pode atualizar.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Pasta atualizada com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Sem permissão para alterar (não é o dono)"),
+            @ApiResponse(responseCode = "404", description = "Pasta não encontrada")
+    })
     public ResponseEntity<BoardResponseDTO> updateBoard(
-            @AuthenticationPrincipal UserDetails currentUser,
-            @PathVariable UUID id,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails currentUser,
+            @Parameter(description = "ID da pasta") @PathVariable UUID id,
             @Valid @RequestBody BoardUpdateRequestDTO request) {
         UUID requesterId = UUID.fromString(currentUser.getUsername());
         BoardResponseDTO response = boardService.updateBoard(id, requesterId, request);
@@ -59,9 +83,14 @@ public class BoardController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "Deletar pasta", description = "Exclui a pasta indicada. Apenas o dono pode excluir.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Pasta excluída com sucesso"),
+            @ApiResponse(responseCode = "403", description = "Sem permissão para alterar (não é o dono)")
+    })
     public ResponseEntity<Void> deleteBoard(
-            @AuthenticationPrincipal UserDetails currentUser,
-            @PathVariable UUID id) {
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails currentUser,
+            @Parameter(description = "ID da pasta") @PathVariable UUID id) {
         UUID requesterId = UUID.fromString(currentUser.getUsername());
         boardService.deleteBoard(id, requesterId);
         return ResponseEntity.noContent().build();

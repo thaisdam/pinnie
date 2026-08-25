@@ -4,19 +4,32 @@ import com.pinnie.model.Pin;
 
 import java.time.Instant;
 import java.util.UUID;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Dados públicos de um Pin")
 public class PinResponseDTO {
 
+    @Schema(description = "ID do Pin", example = "123e4567-e89b-12d3-a456-426614174000")
     private UUID id;
+    @Schema(description = "Título do Pin", example = "Receita de Bolo")
     private String title;
+    @Schema(description = "Descrição detalhada")
     private String description;
+    @Schema(description = "URL externa")
     private String link;
+    @Schema(description = "Texto alternativo para acessibilidade")
     private String altText;
+    @Schema(description = "ID do usuário que publicou")
     private UUID userId;
+    @Schema(description = "URL relativa da imagem", example = "/uploads/123-uuid.jpg")
     private String imageUrl;
+    @Schema(description = "Largura da imagem em pixels", example = "1080")
     private int imageWidth;
+    @Schema(description = "Altura da imagem em pixels", example = "1920")
     private int imageHeight;
+    @Schema(description = "Data de criação")
     private Instant createdAt;
+    @Schema(description = "Data de última atualização")
     private Instant updatedAt;
 
     public PinResponseDTO() {}

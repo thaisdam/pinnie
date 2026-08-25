@@ -5,21 +5,28 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 import java.util.UUID;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Requisição para criação final de um Pin (Etapa 2 do Upload)")
 public class PinCreateRequestDTO {
 
+    @Schema(description = "Título do Pin", example = "Receita de Bolo", maxLength = 100)
     @Size(max = 100, message = "Title must not exceed 100 characters")
     private String title;
 
+    @Schema(description = "Descrição detalhada do Pin", example = "Bolo de chocolate super fofinho feito no liquidificador.")
     private String description;
 
+    @Schema(description = "Link de destino (opcional)", example = "https://meublog.com/bolo")
     @Pattern(regexp = "^(https?://.*)?$", message = "Link must be a valid HTTP/HTTPS URL or empty")
     @Size(max = 2048, message = "Link must not exceed 2048 characters")
     private String link;
 
+    @Schema(description = "Texto alternativo para acessibilidade", example = "Bolo de chocolate com cobertura derretida", maxLength = 255)
     @Size(max = 255, message = "Alt text must not exceed 255 characters")
     private String altText;
 
+    @Schema(description = "ID do upload retornado na Etapa 1. Obrigatório para vincular a imagem ao Pin.", example = "123e4567-e89b-12d3-a456-426614174000", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Upload ID is required")
     private UUID uploadId;
 

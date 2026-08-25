@@ -4,15 +4,24 @@ import com.pinnie.model.Board;
 
 import java.time.Instant;
 import java.util.UUID;
+import io.swagger.v3.oas.annotations.media.Schema;
 
+@Schema(description = "Dados públicos de uma Pasta (Board)")
 public class BoardResponseDTO {
 
+    @Schema(description = "ID da Pasta")
     private UUID id;
+    @Schema(description = "Nome da Pasta")
     private String name;
+    @Schema(description = "Descrição")
     private String description;
+    @Schema(description = "Indica se a pasta é privada")
     private boolean isPrivate;
+    @Schema(description = "ID do dono da pasta")
     private UUID userId;
+    @Schema(description = "Data de criação")
     private Instant createdAt;
+    @Schema(description = "Data de última atualização")
     private Instant updatedAt;
 
     public BoardResponseDTO() {}
