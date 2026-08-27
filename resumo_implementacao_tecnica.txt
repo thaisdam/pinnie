@@ -1,0 +1,113 @@
+================================================================================
+DOCUMENTAÇÃO TÉCNICA APROFUNDADA - PINNIE (FRONTEND & BACKEND CORE MVP)
+================================================================================
+
+Este documento descreve exaustivamente as implementações arquiteturais, lógicas, fluxo de dados e trechos de código estrutural dos 3 últimos módulos técnicos, cobrindo todo o ciclo desde o Banco de Dados até a renderização no DOM do Vue.js.
+
+--------------------------------------------------------------------------------
+1. MÓDULO 7: BUSCA TEXTUAL GLOBAL (SEARCH SYSTEM)
+--------------------------------------------------------------------------------
+OBJETIVO:
+Implementar um sistema de busca case-insensitive que varre Título e Descrição dos Pins e atualiza o frontend de forma dinâmica.
+
+1.1. Backend (Spring Boot & Data JPA)
+- Repositório (PinRepository): 
+  Implementamos uma Query Method nativa do Spring Data: 
+  `List<Pin> findTop50ByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String desc);`
+  Por baixo dos panos, o Hibernate traduz isso para uma query SQL usando a cláusula `ILIKE` do PostgreSQL e um operador `OR`, limitando os resultados com `LIMIT 50` para evitar gargalos de memória.
+- Controlador (SearchController):
+  Criamos o endpoint `GET /api/search/pins?query=...`. O método recebe a `@RequestParam("query") String query` e delega a lógica para o `SearchService`, que consulta o repositório, mapeia a entidade `Pin` para a camada de visualização `PinResponseDTO` usando streams do Java (`pins.stream().map(PinResponseDTO::new).collect(...)`), e retorna um `ResponseEntity.ok()`.
+
+1.2. Frontend (Vue 3, Vue Router e Axios)
+- Barra de Busca Global (App.vue):
+  O `<form @submit.prevent="handleSearch">` captura a submissão para evitar o reload da página.
+  No setup() do componente, usamos `const router = useRouter()` do Vue Router. Ao submeter, invocamos `router.push({ path: '/search', query: { q: searchQuery.value } })`.
+- Camada de Visão (SearchView.vue):
+  Importamos a `useRoute` e criamos um `watch( () => route.query.q, (newQuery) => { fetchResults(newQuery) } )`.
+  Isso significa que, mesmo se o usuário já estiver na página de busca e realizar *outra* busca, o Vue escutará a mutação na URL e fará uma nova requisição `Axios.get()` de forma reativa e instantânea sem recarregar o componente.
+  O estado é manipulado via Composition API com `const results = ref([])` e `const isLoading = ref(true)`.
+
+--------------------------------------------------------------------------------
+2. MÓDULO 6/10: LÓGICA DE FEED, PAGINAÇÃO E MASONRY GRID
+--------------------------------------------------------------------------------
+OBJETIVO:
+Carregar Pins do servidor, suportar grandes quantidades de dados (preparação para paginação) e exibi-los num Grid em formato cascata (Pinterest-like).
+
+2.1. Backend (Spring Data Pagination)
+- Controlador (FeedController):
+  Para evitar enviar o banco de dados inteiro em uma requisição, configuramos o `FeedController` para aceitar um objeto `Pageable`.
+  O endpoint `GET /api/feed` recebe `@RequestParam(defaultValue = "0") int page` e `@RequestParam(defaultValue = "20") int size`.
+  No Serviço, chamamos `pinRepository.findAllByOrderByCreatedAtDesc(PageRequest.of(page, size))`. O resultado não é apenas uma lista, mas um objeto `Slice<Pin>`, que traz os dados de forma leve com a propriedade `hasNext`, evitando as pesadas consultas de `COUNT(*)` no banco de dados.
+
+2.2. Frontend (Estado Global com Pinia)
+- Criação da Store (feedStore.js):
+  Usando o Pinia, definimos a Store para abstrair o Axios das Views.
+  ```javascript
+  export const useFeedStore = defineStore('feed', {
+    state: () => ({ pins: [], isLoading: false, error: null }),
+    actions: {
+      async fetchFeed() {
+        this.isLoading = true;
+        try {
+          const response = await axios.get('/api/feed');
+          this.pins = response.data.content; // Extrai a lista de dentro do objeto Slice do Spring
+        } catch (err) {
+          this.error = 'Ocorreu um erro ao carregar o feed.';
+        } finally {
+          this.isLoading = false;
+        }
+      }
+    }
+  });
+  ```
+- Motor de Renderização HTML/CSS (Masonry Grid):
+  Na `HomeView.vue`, importamos e iteramos: `<div v-for="pin in feedStore.pins" :key="pin.id">`.
+  A estrutura de mosaico não utilizou Javascript pesado. Aproveitamos o algoritmo nativo de colunas do CSS3 (`column-count: 5` e `column-gap: 16px`). Nas imagens dos Pins, aplicamos `break-inside: avoid` e `width: 100%`, fazendo o navegador empilhar os blocos verticalmente de forma irregular sem cortar as imagens.
+
+--------------------------------------------------------------------------------
+3. MÓDULO 4/5: MULTIPART UPLOAD, CRIAÇÃO DE PINS E RELACIONAMENTO (N:N)
+--------------------------------------------------------------------------------
+OBJETIVO:
+Lidar com envio de arquivos binários no Frontend, armazená-los no disco (Backend) e persistir o relacionamento entre Pastas (Boards) e Pins.
+
+3.1. Tratamento de Arquivos e Formulários (PinCreateView.vue)
+- Virtualização da Imagem (`@change="handleFileChange"`):
+  Ao anexar uma foto, a função nativa `URL.createObjectURL(file)` cria um link blob virtual provisório na memória. Isso permite mostrar o preview imediato da imagem escolhida na tag `<img>` sem nem mesmo tê-la salvo no servidor.
+- Envio via FormData:
+  Ao contrário de JSON padrão, arquivos requerem codificação especial.
+  ```javascript
+  const formData = new FormData();
+  formData.append('title', title.value);
+  formData.append('description', desc.value);
+  formData.append('file', selectedFile.value); // Objeto File real
+  await axios.post('/api/pins', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+  ```
+
+3.2. Armazenamento no Backend (LocalImageStorageServiceImpl.java)
+- O `PinController` recebe o `MultipartFile file`.
+- A interface `ImageStorageService` intercepta esse arquivo. Geramos um identificador único com `UUID.randomUUID()` seguido da extensão do arquivo original para evitar colisões.
+- Usamos `Files.copy(file.getInputStream(), destinationPath, StandardCopyOption.REPLACE_EXISTING)` para escrever os bytes da requisição diretamente no diretório físico de uploads da aplicação.
+- A string contendo o caminho estático (ex: `/uploads/123-uuid.jpg`) é salva no Banco de Dados.
+
+3.3. Relacionamento Associativo de Board & Pins
+- Backend (BoardPinRepository e Lógica de Domínio):
+  A associação entre "Pasta" e "Pin" não está gravada diretamente na tabela `pins` ou `boards`, mas em uma terceira tabela de junção `board_pins` (entidade `BoardPin`). 
+  O endpoint `POST /api/boards/{boardId}/pins/{pinId}` consulta o repositório para verificar duplicatas (`boardPinRepository.existsByBoardIdAndPinId`). Caso já exista, lança uma `DuplicateResourceException` customizada interceptada pelo `@ControllerAdvice`.
+  Se for livre, instanciamos a classe, setamos os IDs via FK (Chaves Estrangeiras) e salvamos.
+- Integração Frontend (PinDetailView.vue):
+  Carrega dinamicamente, no gancho de ciclo de vida `onMounted()`, a lista de pastas exclusivas do usuário (`/api/boards/user`). Utiliza um `<select v-model="selectedBoard">` para atrelar a escolha do usuário diretamente ao estado reativo. Ao clicar no botão de salvar, o Action apenas monta a string da URL com os IDs já mapeados e dispara a POST request cega.
+
+--------------------------------------------------------------------------------
+4. MÓDULO 12: DOCUMENTAÇÃO OPENAPI / SWAGGER
+--------------------------------------------------------------------------------
+OBJETIVO:
+Mapear dinamicamente os controllers REST e DTOs para gerar uma interface de documentação viva e interativa da API, protegendo as regras de negócio e dados sensíveis (hashing, IDs vitais, etc).
+
+4.1. Configuração Base e Controllers
+- A dependência `springdoc-openapi-starter-webmvc-ui` (v2.6.0) foi incluída, e as rotas `/v3/api-docs/**` e `/swagger-ui/**` foram liberadas no Spring Security.
+- Cada Controller foi mapeado com `@Tag` e `@Operation`. O comportamento mecânico do `Slice` no Feed e Busca foi traduzido manualmente via `@Parameter`, ocultando o `Pageable` para quem for testar pela interface.
+- O Upload em Duas Etapas (Two-Step) recebeu um schema nativo de binário (`format = "binary", mediaType = "multipart/form-data"`), renderizando um botão nativo de upload de arquivo no Swagger UI.
+
+4.2. DTOs e Segurança
+- O `UserResponseDTO`, `BoardResponseDTO`, e demais respostas foram rigidamente blindados por anotações `@Schema`, expondo em `example` e `description` unicamente as propriedades públicas.
+- A validação JWT é via Cookie (`HttpOnly`). O fluxo de autenticação via Swagger não pôde ser validado integralmente no ambiente de desenvolvimento local atual devido à indisponibilidade do banco (bug de Npipe do Docker Desktop no Windows). Como o JWT permanece em cookie HttpOnly, ele não é exposto ou manipulável diretamente pelo JavaScript do Swagger. A validação completa do fluxo autenticado deverá ser realizada quando o backend estiver executando com o banco disponível de forma íntegra.

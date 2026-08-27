@@ -37,22 +37,34 @@
         <!-- Direita: Informações -->
         <div class="pin-info-col">
           <div class="pin-actions">
-            <!-- Funcionalidade Salvar (Apenas logados) -->
-            <div class="save-wrapper" v-if="authStore.isAuthenticated">
-              <select v-model="selectedBoardId" class="board-select">
-                <option disabled value="">Selecione a Pasta</option>
-                <option v-for="board in myBoards" :key="board.id" :value="board.id">
-                  {{ board.name }}
-                </option>
-              </select>
+            <!-- Funcionalidade Salvar e Curtir (Apenas logados) -->
+            <div class="action-buttons-row" v-if="authStore.isAuthenticated">
               <button 
-                class="btn-save" 
-                @click="savePinToBoard" 
-                :disabled="isSaving || !selectedBoardId || isSaved"
-                :class="{'btn-saved': isSaved}"
+                class="btn-icon btn-like" 
+                @click="toggleLike" 
+                :disabled="isLiking"
+                :class="{'btn-liked': pin.likedByMe}"
+                title="Curtir"
               >
-                {{ saveStatusText }}
+                {{ pin.likedByMe ? '♥' : '♡' }} <span class="likes-count">{{ pin.likesCount || 0 }}</span>
               </button>
+
+              <div class="save-wrapper">
+                <select v-model="selectedBoardId" class="board-select">
+                  <option disabled value="">Selecione a Pasta</option>
+                  <option v-for="board in myBoards" :key="board.id" :value="board.id">
+                    {{ board.name }}
+                  </option>
+                </select>
+                <button 
+                  class="btn-save" 
+                  @click="savePinToBoard" 
+                  :disabled="isSaving || !selectedBoardId || isSaved"
+                  :class="{'btn-saved': isSaved}"
+                >
+                  {{ saveStatusText }}
+                </button>
+              </div>
             </div>
             <p v-if="saveError" class="save-error">{{ saveError }}</p>
           </div>
@@ -66,7 +78,24 @@
             </a>
           </div>
 
-          <div class="pin-creator">
+          <div class="pin-creator" v-if="creatorProfile">
+            <img :src="creatorAvatarUrl" alt="Avatar" class="creator-avatar" />
+            <div class="creator-info">
+              <span class="creator-id">{{ creatorProfile.displayName || creatorProfile.username }}</span>
+              <span class="creator-followers">{{ creatorProfile.followersCount }} seguidores</span>
+            </div>
+            
+            <button 
+              v-if="authStore.isAuthenticated && authStore.user.id !== creatorProfile.id"
+              class="btn-follow"
+              :class="{'btn-following': creatorProfile.followedByMe}"
+              @click="toggleFollow"
+              :disabled="isFollowing"
+            >
+              {{ creatorProfile.followedByMe ? 'Seguindo' : 'Seguir' }}
+            </button>
+          </div>
+          <div class="pin-creator" v-else>
             <div class="creator-avatar"></div>
             <div class="creator-info">
               <span class="creator-label">Criador(a)</span>
@@ -183,12 +212,24 @@ const savePinToBoard = async () => {
   }
 };
 
+const fetchCreatorProfile = async (creatorId) => {
+  try {
+    const response = await api.get(`/users/${creatorId}`);
+    creatorProfile.value = response.data;
+  } catch (err) {
+    console.error('Erro ao buscar perfil do criador:', err);
+  }
+};
+
 const fetchPin = async () => {
   isLoading.value = true;
   error.value = null;
   try {
     const response = await api.get(`/pins/${pinId}`);
     pin.value = response.data;
+    if (pin.value.userId) {
+      await fetchCreatorProfile(pin.value.userId);
+    }
   } catch (err) {
     console.error('Erro ao buscar o Pin:', err);
     if (err.response && err.response.status === 404) {
@@ -198,6 +239,62 @@ const fetchPin = async () => {
     }
   } finally {
     isLoading.value = false;
+  }
+};
+
+// --- Lógica de Liking e Following ---
+const isLiking = ref(false);
+const isFollowing = ref(false);
+const creatorProfile = ref(null);
+
+const creatorAvatarUrl = computed(() => {
+  if (!creatorProfile.value) return '';
+  if (creatorProfile.value.avatarUrl) {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || '';
+    return `${baseUrl}${creatorProfile.value.avatarUrl}`;
+  }
+  return `https://ui-avatars.com/api/?name=${creatorProfile.value.displayName || creatorProfile.value.username}&background=random`;
+});
+
+const toggleLike = async () => {
+  if (!authStore.isAuthenticated) return;
+  isLiking.value = true;
+  try {
+    if (pin.value.likedByMe) {
+      await api.delete(`/pins/${pinId}/like`);
+      pin.value.likedByMe = false;
+      pin.value.likesCount--;
+    } else {
+      await api.post(`/pins/${pinId}/like`);
+      pin.value.likedByMe = true;
+      pin.value.likesCount++;
+    }
+  } catch (err) {
+    console.error('Erro ao curtir/descurtir:', err);
+    alert('Erro ao curtir: ' + (err.response?.data?.message || err.response?.status || err.message));
+  } finally {
+    isLiking.value = false;
+  }
+};
+
+const toggleFollow = async () => {
+  if (!authStore.isAuthenticated || !creatorProfile.value) return;
+  isFollowing.value = true;
+  try {
+    if (creatorProfile.value.followedByMe) {
+      await api.delete(`/users/${creatorProfile.value.id}/follow`);
+      creatorProfile.value.followedByMe = false;
+      creatorProfile.value.followersCount--;
+    } else {
+      await api.post(`/users/${creatorProfile.value.id}/follow`);
+      creatorProfile.value.followedByMe = true;
+      creatorProfile.value.followersCount++;
+    }
+  } catch (err) {
+    console.error('Erro ao seguir/deixar de seguir:', err);
+    alert('Erro ao seguir: ' + (err.response?.data?.message || err.response?.status || err.message));
+  } finally {
+    isFollowing.value = false;
   }
 };
 
@@ -246,7 +343,7 @@ const submitComment = async () => {
     await fetchComments(0, false);
   } catch (err) {
     console.error('Erro ao enviar comentário:', err);
-    alert('Erro ao enviar comentário');
+    alert('Erro ao enviar comentário: ' + (err.response?.data?.message || err.response?.status || err.message));
   } finally {
     isSubmittingComment.value = false;
   }
@@ -468,7 +565,70 @@ onMounted(() => {
   background-color: #efefef;
 }
 
-/* Creator Mockup */
+/* Creator and Social Styles */
+.action-buttons-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.btn-like {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+.btn-like:hover:not(:disabled) {
+  background: #f0f0f0;
+}
+
+.btn-liked {
+  color: #ff4444;
+  border-color: #ff4444;
+}
+
+.creator-followers {
+  font-size: 0.8rem;
+  color: var(--color-text-light);
+}
+
+.btn-follow {
+  margin-left: auto;
+  background-color: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color var(--transition-fast);
+}
+
+.btn-follow:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.btn-following {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-following:hover:not(:disabled) {
+  background-color: #efefef;
+}
+
 .pin-creator {
   margin-top: auto;
   display: flex;
@@ -484,6 +644,7 @@ onMounted(() => {
   border-radius: 50%;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
+  object-fit: cover;
 }
 
 .creator-info {

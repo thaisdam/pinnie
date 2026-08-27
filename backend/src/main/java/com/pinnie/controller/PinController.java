@@ -26,15 +26,19 @@ import io.swagger.v3.oas.annotations.media.Schema;
 
 import java.util.UUID;
 
+import com.pinnie.repository.PinLikeRepository;
+
 @RestController
 @RequestMapping("/api/pins")
 @Tag(name = "Pins", description = "Endpoints para upload, criação e gerenciamento de Pins")
 public class PinController {
 
     private final PinService pinService;
+    private final PinLikeRepository pinLikeRepository;
 
-    public PinController(PinService pinService) {
+    public PinController(PinService pinService, PinLikeRepository pinLikeRepository) {
         this.pinService = pinService;
+        this.pinLikeRepository = pinLikeRepository;
     }
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -74,8 +78,16 @@ public class PinController {
             @ApiResponse(responseCode = "200", description = "Pin encontrado"),
             @ApiResponse(responseCode = "404", description = "Pin não encontrado")
     })
-    public ResponseEntity<PinResponseDTO> getPin(@Parameter(description = "ID do pin") @PathVariable UUID id) {
-        return ResponseEntity.ok(pinService.getPin(id));
+    public ResponseEntity<PinResponseDTO> getPin(
+            @Parameter(description = "ID do pin") @PathVariable UUID id,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
+        PinResponseDTO dto = pinService.getPin(id);
+        dto.setLikesCount(pinLikeRepository.countByPinId(id));
+        if (userDetails != null) {
+            UUID currentUserId = UUID.fromString(userDetails.getUsername());
+            dto.setLikedByMe(pinLikeRepository.existsByPinIdAndUserId(id, currentUserId));
+        }
+        return ResponseEntity.ok(dto);
     }
 
     @GetMapping("/user/{userId}")

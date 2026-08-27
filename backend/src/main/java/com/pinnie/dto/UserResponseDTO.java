@@ -19,7 +19,13 @@ public record UserResponseDTO(
         @Schema(description = "URL do avatar do usuário")
         String avatarUrl,
         @Schema(description = "Indica se a conta está ativada")
-        boolean enabled
+        boolean enabled,
+        @Schema(description = "Número de seguidores")
+        long followersCount,
+        @Schema(description = "Número de pessoas que segue")
+        long followingCount,
+        @Schema(description = "Indica se o usuário atual segue este usuário")
+        boolean followedByMe
 ) {
     public static UserResponseDTO fromEntity(User user) {
         return new UserResponseDTO(
@@ -29,7 +35,10 @@ public record UserResponseDTO(
                 user.getDisplayName(),
                 user.getBio(),
                 user.getAvatarUrl(),
-                user.isEnabled()
+                user.isEnabled(),
+                0, // followersCount padrão
+                0, // followingCount padrão
+                false // followedByMe padrão
         );
     }
 }

@@ -38,7 +38,8 @@ const router = createRouter({
     {
       path: '/pin/:id',
       name: 'pin-detail',
-      component: () => import('../views/PinView.vue')
+      component: () => import('../views/PinView.vue'),
+      meta: { requiresAuth: true }
     },
     {
       path: '/login',

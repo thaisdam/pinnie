@@ -1,57 +1,72 @@
 <template>
-  <main class="home-view container">
+  <main class="home-view">
     
-    <!-- Loading State -->
-    <div v-if="feedStore.isLoading && feedStore.pins.length === 0" class="loading-state">
-      <div class="loader"></div>
-      <p>Buscando inspirações...</p>
-    </div>
-
-    <!-- Error State -->
-    <div v-else-if="feedStore.error && feedStore.pins.length === 0" class="error-state">
-      <h2>Ops!</h2>
-      <p>{{ feedStore.error }}</p>
-      <button class="retry-btn" @click="feedStore.fetchFeed">Tentar novamente</button>
-    </div>
-
-    <div v-else-if="!feedStore.isLoading && feedStore.pins.length === 0" class="empty-state">
-      <h2>Ainda não há nada aqui.</h2>
-      <p>Seja o primeiro a adicionar inspirações ao Pinnie!</p>
-    </div>
-
-    <!-- Content State (Masonry Grid e Scroll Infinito) -->
-    <div v-else class="content-state">
-      <div class="masonry-grid">
-        <PinCard 
-          v-for="pin in feedStore.pins" 
-          :key="pin.id" 
-          :pin="pin" 
-        />
-      </div>
-
-      <!-- Gatilho do Scroll Infinito -->
-      <div ref="bottomTrigger" class="infinite-scroll-trigger"></div>
-
-      <!-- Loading Adicional Discreto -->
-      <div v-if="feedStore.isLoading && feedStore.pins.length > 0" class="loading-more">
-        <div class="loader loader-small"></div>
-      </div>
-
-      <!-- Fim do Feed -->
-      <div v-if="!feedStore.hasNext && feedStore.pins.length > 0" class="end-of-feed">
-        <p>Você chegou ao fim das inspirações</p>
+    <!-- Hero Banner (Teaser) para usuários não logados -->
+    <div v-if="!authStore.isAuthenticated" class="hero-teaser">
+      <div class="hero-content">
+        <h1>Encontre sua próxima ideia</h1>
+        <p>Explore o mundo da criatividade. Faça login para guardar e interagir com suas inspirações favoritas.</p>
+        <div class="hero-actions">
+          <router-link to="/login" class="btn btn-primary">Fazer Login</router-link>
+          <router-link to="/register" class="btn btn-secondary">Cadastre-se</router-link>
+        </div>
       </div>
     </div>
 
+    <div class="container">
+      <!-- Loading State -->
+      <div v-if="feedStore.isLoading && feedStore.pins.length === 0" class="loading-state">
+        <div class="loader"></div>
+        <p>Buscando inspirações...</p>
+      </div>
+
+      <!-- Error State -->
+      <div v-else-if="feedStore.error && feedStore.pins.length === 0" class="error-state">
+        <h2>Ops!</h2>
+        <p>{{ feedStore.error }}</p>
+        <button class="retry-btn" @click="feedStore.fetchFeed">Tentar novamente</button>
+      </div>
+
+      <div v-else-if="!feedStore.isLoading && feedStore.pins.length === 0" class="empty-state">
+        <h2>Ainda não há nada aqui.</h2>
+        <p>Seja o primeiro a adicionar inspirações ao Pinnie!</p>
+      </div>
+
+      <!-- Content State (Masonry Grid e Scroll Infinito) -->
+      <div v-else class="content-state">
+        <div class="masonry-grid">
+          <PinCard 
+            v-for="pin in feedStore.pins" 
+            :key="pin.id" 
+            :pin="pin" 
+          />
+        </div>
+
+        <!-- Gatilho do Scroll Infinito -->
+        <div ref="bottomTrigger" class="infinite-scroll-trigger"></div>
+
+        <!-- Loading Adicional Discreto -->
+        <div v-if="feedStore.isLoading && feedStore.pins.length > 0" class="loading-more">
+          <div class="loader loader-small"></div>
+        </div>
+
+        <!-- Fim do Feed -->
+        <div v-if="!feedStore.hasNext && feedStore.pins.length > 0" class="end-of-feed">
+          <p>Você chegou ao fim das inspirações</p>
+        </div>
+      </div>
+    </div>
   </main>
 </template>
 
 <script setup>
 import { onMounted, onUnmounted, ref } from 'vue';
 import { useFeedStore } from '../stores/feed';
+import { useAuthStore } from '../stores/auth';
 import PinCard from '../components/PinCard.vue';
 
 const feedStore = useFeedStore();
+const authStore = useAuthStore();
 const bottomTrigger = ref(null);
 let observer = null;
 
@@ -107,6 +122,66 @@ onUnmounted(() => {
 
 @media (min-width: 1536px) {
   .masonry-grid { column-count: 5; }
+}
+
+/* Hero Teaser */
+.hero-teaser {
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 4rem 2rem;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.hero-content {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.hero-content h1 {
+  font-size: 2.5rem;
+  color: var(--color-text);
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.125rem;
+  color: var(--color-text-light);
+  margin-bottom: 2rem;
+}
+
+.hero-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  border-radius: 24px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #ad081b;
+}
+
+.btn-secondary {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background-color: #efefef;
 }
 
 /* States */
