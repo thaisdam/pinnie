@@ -1,5 +1,7 @@
 /* Reset and Base Styles */
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -11,20 +13,21 @@
   --color-surface: #f9f9f9;
   --color-text: #111111;
   --color-text-light: #555555;
-  --color-primary: #e60023; /* A Pinnie red */
-  --color-primary-hover: #ad081b;
+  --color-primary: #F7B801;
+  /* A Pinnie red */
+  --color-primary-hover: #F18701;
   --color-border: #efefef;
 
   /* Typography */
   --font-family: 'IBM Plex Sans', sans-serif;
-  
+
   /* Layout */
   --border-radius: 20px;
   --spacing-sm: 8px;
   --spacing-md: 16px;
   --spacing-lg: 24px;
   --spacing-xl: 32px;
-  
+
   /* Shadows & Glassmorphism Transitions */
   --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
   --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -98,7 +101,8 @@ button {
   border-radius: var(--border-radius);
 }
 
-.nav-link:hover, .nav-link.router-link-active {
+.nav-link:hover,
+.nav-link.router-link-active {
   background-color: var(--color-surface);
 }
 

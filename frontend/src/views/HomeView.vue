@@ -171,7 +171,7 @@ onUnmounted(() => {
 }
 
 .btn-primary:hover {
-  background-color: #ad081b;
+  background-color: var(--color-primary-hover);
 }
 
 .btn-secondary {

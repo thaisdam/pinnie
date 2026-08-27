@@ -28,7 +28,18 @@
         <template v-if="authStore.isAuthenticated">
           <router-link to="/boards" class="nav-link">Minhas Pastas</router-link>
           <router-link to="/pin/create" class="nav-link">Criar Pin</router-link>
-          <span class="nav-user">Olá, {{ authStore.user?.displayName }}</span>
+          
+          <!-- Link para o Perfil -->
+          <router-link to="/profile/me" class="nav-user-link">
+            <div class="nav-avatar" v-if="authStore.user?.avatarUrl">
+              <img :src="`${baseUrl}${authStore.user.avatarUrl}`" alt="Avatar" />
+            </div>
+            <div class="nav-avatar-placeholder" v-else>
+              {{ authStore.user?.displayName?.charAt(0).toUpperCase() || 'U' }}
+            </div>
+            <span>{{ authStore.user?.displayName?.split(' ')[0] }}</span>
+          </router-link>
+
           <button @click="handleLogout" class="btn-logout" :disabled="authStore.loading">
             Sair
           </button>
@@ -57,6 +68,7 @@ const route = useRoute();
 const authStore = useAuthStore();
 
 const searchQuery = ref('');
+const baseUrl = import.meta.env.VITE_BACKEND_URL || '';
 
 // Mantém o input atualizado com a URL caso o usuário recarregue a página
 watch(() => route.query.q, (newQ) => {
@@ -109,7 +121,7 @@ const handleLogout = async () => {
 .search-form:focus-within {
   border-color: var(--color-primary);
   background-color: var(--color-background);
-  box-shadow: 0 0 0 4px rgba(230, 0, 35, 0.1);
+  box-shadow: 0 0 0 4px rgba(247, 184, 1, 0.2); /* rgba equivalente ao amarelo primary */
 }
 
 .search-icon {
@@ -162,12 +174,42 @@ const handleLogout = async () => {
   background-color: var(--color-surface);
 }
 
-.nav-user {
-  font-weight: 600;
-  color: var(--color-text);
-  margin-right: var(--spacing-sm);
+.nav-user-link {
   display: flex;
   align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  color: var(--color-text);
+  padding: 4px 12px 4px 4px;
+  border-radius: 24px;
+  transition: background-color var(--transition-fast);
+}
+
+.nav-user-link:hover {
+  background-color: var(--color-surface);
+}
+
+.nav-avatar, .nav-avatar-placeholder {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.nav-avatar-placeholder {
+  background-color: #eee;
+  color: var(--color-text-light);
+  font-size: 0.9rem;
 }
 
 .btn-logout {
