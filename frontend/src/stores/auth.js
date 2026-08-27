@@ -92,6 +92,48 @@ export const useAuthStore = defineStore('auth', {
         this.clearUser();
         this.loading = false;
       }
+    },
+    async updateProfile(profileData) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const response = await api.put('/users/me/profile', profileData);
+        this.setUser(response.data);
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erro ao atualizar perfil';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async updateAvatar(file) {
+      this.loading = true;
+      this.error = null;
+      try {
+        const formData = new FormData();
+        formData.append('file', file);
+        const response = await api.post('/users/me/avatar', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        this.setUser(response.data);
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erro ao atualizar foto de perfil';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
+    },
+    async updatePassword(passwordData) {
+      this.loading = true;
+      this.error = null;
+      try {
+        await api.put('/users/me/password', passwordData);
+      } catch (error) {
+        this.error = error.response?.data?.message || 'Erro ao atualizar senha';
+        throw error;
+      } finally {
+        this.loading = false;
+      }
     }
   }
 });
