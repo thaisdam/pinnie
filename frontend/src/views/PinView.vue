@@ -146,6 +146,18 @@
       </div>
     </div>
     
+    <!-- Modal de Confirmação de Exclusão -->
+    <div v-if="showDeleteModal" class="modal-overlay" @click.self="cancelDelete">
+      <div class="modal-content">
+        <h3>Excluir Comentário?</h3>
+        <p>Esta ação não pode ser desfeita.</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" @click="cancelDelete">Cancelar</button>
+          <button class="btn-delete" @click="confirmDeleteComment">Excluir</button>
+        </div>
+      </div>
+    </div>
+    
   </main>
 </template>
 
@@ -349,16 +361,32 @@ const submitComment = async () => {
   }
 };
 
-const deleteComment = async (commentId) => {
-  if (!confirm('Deseja realmente excluir este comentário?')) return;
+const showDeleteModal = ref(false);
+const commentToDelete = ref(null);
+
+const deleteComment = (commentId) => {
+  commentToDelete.value = commentId;
+  showDeleteModal.value = true;
+};
+
+const cancelDelete = () => {
+  showDeleteModal.value = false;
+  commentToDelete.value = null;
+};
+
+const confirmDeleteComment = async () => {
+  if (!commentToDelete.value) return;
   
   try {
-    await api.delete(`/pins/${pinId}/comments/${commentId}`);
+    await api.delete(`/pins/${pinId}/comments/${commentToDelete.value}`);
     // Recarrega os comentários do zero (sem optimistic update)
     await fetchComments(0, false);
   } catch (err) {
     console.error('Erro ao excluir comentário:', err);
     alert('Erro ao excluir comentário');
+  } finally {
+    showDeleteModal.value = false;
+    commentToDelete.value = null;
   }
 };
 
@@ -751,5 +779,72 @@ onMounted(() => {
 .btn-load-more:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Modal de Exclusão */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--color-surface);
+  padding: var(--spacing-xl);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-lg);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: var(--spacing-sm);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.modal-content p {
+  margin-bottom: var(--spacing-lg);
+  color: var(--color-text-light);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity var(--transition-fast);
+}
+
+.modal-actions button:hover {
+  opacity: 0.8;
+}
+
+.btn-cancel {
+  background-color: var(--color-background);
+  color: var(--color-text);
+  border: 1px solid var(--color-border) !important;
+}
+
+.btn-delete {
+  background-color: #ff4444;
+  color: white;
 }
 </style>
