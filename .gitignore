@@ -33,3 +33,7 @@ implementation_plan.md
 .agents/rules/*.txt
 resumo_implamentacao_tecnica.txt
 auditoria_mvp.md
+
+# Uploads
+backend/uploads/
+backend/test-csrf.js

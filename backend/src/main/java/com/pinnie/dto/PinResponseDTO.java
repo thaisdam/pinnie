@@ -31,6 +31,11 @@ public class PinResponseDTO {
     private Instant createdAt;
     @Schema(description = "Data de última atualização")
     private Instant updatedAt;
+    
+    @Schema(description = "Quantidade de curtidas")
+    private long likesCount;
+    @Schema(description = "Indica se o usuário atual curtiu o Pin")
+    private boolean likedByMe;
 
     public PinResponseDTO() {}
 
@@ -134,5 +139,21 @@ public class PinResponseDTO {
 
     public void setUpdatedAt(Instant updatedAt) {
         this.updatedAt = updatedAt;
+    }
+    
+    public long getLikesCount() {
+        return likesCount;
+    }
+
+    public void setLikesCount(long likesCount) {
+        this.likesCount = likesCount;
+    }
+
+    public boolean isLikedByMe() {
+        return likedByMe;
+    }
+
+    public void setLikedByMe(boolean likedByMe) {
+        this.likedByMe = likedByMe;
     }
 }

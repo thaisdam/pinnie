@@ -23,6 +23,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.util.UUID;
 
+import com.pinnie.repository.UserFollowRepository;
+
 @RestController
 @RequestMapping("/api/users")
 @Tag(name = "Users", description = "Endpoints para gerenciamento de perfil e dados do usuário")
@@ -30,10 +32,12 @@ public class UserController {
 
     private final UserRepository userRepository;
     private final BoardService boardService;
+    private final UserFollowRepository userFollowRepository;
 
-    public UserController(UserRepository userRepository, BoardService boardService) {
+    public UserController(UserRepository userRepository, BoardService boardService, UserFollowRepository userFollowRepository) {
         this.userRepository = userRepository;
         this.boardService = boardService;
+        this.userFollowRepository = userFollowRepository;
     }
 
     @GetMapping("/me")
@@ -47,7 +51,53 @@ public class UserController {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         
-        return ResponseEntity.ok(UserResponseDTO.fromEntity(user));
+        long followersCount = userFollowRepository.countByFollowingId(userId);
+        long followingCount = userFollowRepository.countByFollowerId(userId);
+        
+        return ResponseEntity.ok(new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getDisplayName(),
+                user.getBio(),
+                user.getAvatarUrl(),
+                user.isEnabled(),
+                followersCount,
+                followingCount,
+                false
+        ));
+    }
+
+    @GetMapping("/{userId}")
+    @Operation(summary = "Obter perfil de um usuário", description = "Retorna os dados públicos de um usuário e verifica se o usuário autenticado o segue.")
+    public ResponseEntity<UserResponseDTO> getUserProfile(
+            @Parameter(description = "ID do usuário") @PathVariable UUID userId,
+            @Parameter(hidden = true) @AuthenticationPrincipal UserDetails userDetails) {
+            
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+                
+        long followersCount = userFollowRepository.countByFollowingId(userId);
+        long followingCount = userFollowRepository.countByFollowerId(userId);
+        boolean followedByMe = false;
+        
+        if (userDetails != null) {
+            UUID currentUserId = UUID.fromString(userDetails.getUsername());
+            followedByMe = userFollowRepository.existsByFollowerIdAndFollowingId(currentUserId, userId);
+        }
+        
+        return ResponseEntity.ok(new UserResponseDTO(
+                user.getId(),
+                user.getUsername(),
+                user.getEmail(),
+                user.getDisplayName(),
+                user.getBio(),
+                user.getAvatarUrl(),
+                user.isEnabled(),
+                followersCount,
+                followingCount,
+                followedByMe
+        ));
     }
 
     @GetMapping("/{userId}/boards")
