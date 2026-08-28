@@ -57,7 +57,7 @@ class SearchControllerIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()", is(1)))
                 .andExpect(jsonPath("$.content[0].title", is("Bolo de Cenoura")))
-                .andExpect(jsonPath("$.hasNext", is(false)));
+                .andExpect(jsonPath("$.last", is(true)));
     }
 
     @Test

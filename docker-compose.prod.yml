@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: pinnie-postgres-prod
+    environment:
+      POSTGRES_USER: ${DB_USERNAME:-pinnie_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-pinnie_password}
+      POSTGRES_DB: pinnie_db
+    ports:
+      - "5433:5432" # Usando 5433 para não conflitar com locais
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build: 
+      context: ./backend
+    container_name: pinnie-backend-prod
+    depends_on:
+      - db
+    environment:
+      - DB_URL=jdbc:postgresql://db:5432/pinnie_db
+      - DB_USERNAME=${DB_USERNAME:-pinnie_user}
+      - DB_PASSWORD=${DB_PASSWORD:-pinnie_password}
+      - JWT_SECRET=${JWT_SECRET:-fallback_secret_must_be_changed}
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost}
+      - SECURE_COOKIE=${SECURE_COOKIE:-false}
+      - SPRING_PROFILES_ACTIVE=prod
+      # Descomente e configure para ativar S3:
+      # - app.storage.type=s3
+      # - app.storage.s3.bucket=meubucket
+      # - app.storage.s3.region=us-east-1
+      # - app.storage.s3.access-key=MINHACHAVE
+      # - app.storage.s3.secret-key=MEUSEGREDO
+    ports:
+      - "8080:8080"
+    volumes:
+      - backend_uploads:/app/uploads
+    restart: always
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: pinnie-frontend-prod
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+    restart: always
+
+volumes:
+  postgres_data_prod:
+  backend_uploads:

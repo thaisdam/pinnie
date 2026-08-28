@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.util.UUID;
 
 @Service
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name = "app.storage.type", havingValue = "local", matchIfMissing = true)
 public class LocalImageStorageServiceImpl implements ImageStorageService {
 
     private static final Logger logger = LoggerFactory.getLogger(LocalImageStorageServiceImpl.class);

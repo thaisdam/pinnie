@@ -34,6 +34,9 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
 
+    @org.springframework.beans.factory.annotation.Value("${app.security.cookie.secure:false}")
+    private boolean secureCookie;
+
     public AuthController(UserService userService, AuthenticationManager authenticationManager, JwtService jwtService) {
         this.userService = userService;
         this.authenticationManager = authenticationManager;
@@ -68,7 +71,7 @@ public class AuthController {
 
         ResponseCookie jwtCookie = ResponseCookie.from("pinnie_jwt", jwt)
                 .httpOnly(true)
-                .secure(false) // Set to true in production with HTTPS
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(7200) // 2 hours
                 .sameSite("Lax")
@@ -87,7 +90,7 @@ public class AuthController {
     public ResponseEntity<Void> logout() {
         ResponseCookie jwtCookie = ResponseCookie.from("pinnie_jwt", "")
                 .httpOnly(true)
-                .secure(false)
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(0)
                 .sameSite("Lax")
@@ -95,7 +98,7 @@ public class AuthController {
 
         ResponseCookie csrfCookie = ResponseCookie.from("XSRF-TOKEN", "")
                 .httpOnly(false)
-                .secure(false)
+                .secure(secureCookie)
                 .path("/")
                 .maxAge(0)
                 .sameSite("Lax")

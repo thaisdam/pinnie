@@ -56,7 +56,7 @@ class FeedControllerIntegrationTest {
         mockMvc.perform(get("/api/feed"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()", is(1)))
-                .andExpect(jsonPath("$.hasNext", is(false)));
+                .andExpect(jsonPath("$.last", is(true)));
     }
 
     @Test
