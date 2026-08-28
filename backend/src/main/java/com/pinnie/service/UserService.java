@@ -48,6 +48,14 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @org.springframework.transaction.annotation.Transactional
+    public void blockUser(java.util.UUID id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new com.pinnie.exception.ResourceNotFoundException("User not found"));
+        user.setEnabled(false);
+        userRepository.save(user);
+    }
+
     public void updatePassword(java.util.UUID userId, com.pinnie.dto.UserPasswordUpdateRequestDTO request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));

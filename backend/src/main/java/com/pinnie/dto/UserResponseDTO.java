@@ -20,6 +20,8 @@ public record UserResponseDTO(
         String avatarUrl,
         @Schema(description = "Indica se a conta está ativada")
         boolean enabled,
+        @Schema(description = "Papel do usuário")
+        com.pinnie.model.Role role,
         @Schema(description = "Número de seguidores")
         long followersCount,
         @Schema(description = "Número de pessoas que segue")
@@ -36,6 +38,7 @@ public record UserResponseDTO(
                 user.getBio(),
                 user.getAvatarUrl(),
                 user.isEnabled(),
+                user.getRole(),
                 0, // followersCount padrão
                 0, // followingCount padrão
                 false // followedByMe padrão

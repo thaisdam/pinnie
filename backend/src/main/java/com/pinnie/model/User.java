@@ -43,6 +43,10 @@ public class User {
     @Column(nullable = false)
     private boolean enabled = true;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(nullable = false, length = 50)
+    private Role role = Role.USER;
+
     @CreatedDate
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
@@ -76,4 +80,6 @@ public class User {
     public void setBio(String bio) { this.bio = bio; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    public void setRole(Role role) { this.role = role; }
+    public Role getRole() { return role; }
 }

@@ -43,10 +43,10 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf
-                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
+                .csrfTokenRepository(new MyCsrfTokenRepository())
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .sessionManagement(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**", "/api/health", "/api/csrf").permitAll()
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/feed").permitAll()
@@ -55,6 +55,7 @@ public class SecurityConfig {
                 .requestMatchers(org.springframework.http.HttpMethod.GET, "/uploads/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .requestMatchers("/error").permitAll()
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
             .addFilterAfter(csrfCookieFilter, BasicAuthenticationFilter.class)

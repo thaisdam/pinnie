@@ -9,6 +9,9 @@ export const useAuthStore = defineStore('auth', {
     error: null,
     isInitializing: true
   }),
+  getters: {
+    isAdmin: (state) => state.user?.role === 'ADMIN'
+  },
   actions: {
     setUser(userData) {
       this.user = userData;

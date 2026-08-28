@@ -62,3 +62,8 @@ Este documento guarda ideias e melhorias mapeadas para o futuro da plataforma Pi
   - Adicionar o campo "Nome de Usuário" no Modal de Edição de Perfil.
   - Tratar adequadamente erros 409 (Conflict) caso o usuário tente pegar um nome que já existe.
   - Atualizar o estado global (Pinia/auth.js) com o novo username em tempo real após o sucesso.
+
+### 7. Ocultar botão "Denunciar Pin" do próprio autor 👁️
+- **Nível de Esforço**: Baixo
+- **Frontend**:
+  - Na `PinView`, ajustar a diretiva `v-if` do botão "Reportar Pin". Ele só deve ser renderizado se o usuário estiver autenticado **e** o `pin.userId` for diferente do `authStore.user.id`. Atualmente ele aparece para todos, o que permite ao usuário reportar a própria postagem.

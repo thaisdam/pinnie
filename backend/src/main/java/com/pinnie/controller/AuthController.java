@@ -88,6 +88,8 @@ public class AuthController {
             @ApiResponse(responseCode = "200", description = "Cookies limpos com sucesso")
     })
     public ResponseEntity<Void> logout() {
+        System.out.println("====== LOGOUT CALLED! ======");
+        new Exception().printStackTrace();
         ResponseCookie jwtCookie = ResponseCookie.from("pinnie_jwt", "")
                 .httpOnly(true)
                 .secure(secureCookie)

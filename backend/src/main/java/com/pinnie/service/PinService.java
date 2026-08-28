@@ -151,6 +151,17 @@ public class PinService {
         imageStorageService.delete(storedFilename);
     }
 
+    @Transactional
+    public void deletePinAsAdmin(UUID id) {
+        Pin pin = pinRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Pin not found"));
+
+        String storedFilename = pin.getMediaStoredFilename();
+        pinRepository.delete(pin);
+
+        imageStorageService.delete(storedFilename);
+    }
+
     private PinResponseDTO mapToResponseDTO(Pin pin) {
         String imageUrl = "/uploads/" + pin.getMediaStoredFilename();
         return new PinResponseDTO(pin, imageUrl);

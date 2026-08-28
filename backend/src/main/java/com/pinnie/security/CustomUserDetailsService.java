@@ -35,7 +35,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .username(user.getId().toString())
                 .password(user.getPasswordHash())
                 .disabled(!user.isEnabled())
-                .authorities(Collections.emptyList())
+                .authorities(java.util.Collections.singletonList(
+                        new org.springframework.security.core.authority.SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                ))
                 .build();
     }
 }

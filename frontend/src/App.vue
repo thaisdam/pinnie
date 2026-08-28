@@ -27,8 +27,12 @@
         
         <template v-if="authStore.isAuthenticated">
           <router-link to="/boards" class="nav-link">Minhas Pastas</router-link>
-          <router-link to="/pin/create" class="nav-link">Criar Pin</router-link>
+          <router-link to="/my-pins" class="nav-link">Meus Pins</router-link>
           
+          <router-link v-if="authStore.isAdmin" to="/admin" class="nav-link" style="color: var(--color-error); font-weight: bold;">
+            Moderação
+          </router-link>
+
           <!-- Link para o Perfil -->
           <router-link to="/profile/me" class="nav-user-link">
             <div class="nav-avatar" v-if="authStore.user?.avatarUrl">

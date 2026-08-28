@@ -25,9 +25,14 @@
           Editar Perfil
         </button>
         <!-- Senão, mostrar Seguir/Deixar de Seguir (se aplicável no MVP) -->
-        <button v-else class="btn btn-primary">
-          {{ profileUser.followedByMe ? 'Seguindo' : 'Seguir' }}
-        </button>
+        <template v-else>
+          <button class="btn btn-primary">
+            {{ profileUser.followedByMe ? 'Seguindo' : 'Seguir' }}
+          </button>
+          <button v-if="authStore.isAuthenticated" @click="showReportModal = true" class="btn-report" style="margin-top: 8px; font-size: 0.8rem; background: transparent; border: none; color: var(--color-error); text-decoration: underline; cursor: pointer; display: block; width: 100%;">
+            Reportar Usuário
+          </button>
+        </template>
       </div>
     </div>
 
@@ -71,6 +76,14 @@
 
     <!-- Modal de Edição -->
     <ProfileEditModal :isOpen="isEditModalOpen" @close="closeEditModal" />
+    
+    <ReportModal 
+      :show="showReportModal" 
+      targetType="USER" 
+      :targetId="profileUser.id" 
+      @close="showReportModal = false" 
+      @success="() => { showReportModal = false; alert('Denúncia enviada com sucesso!'); }" 
+    />
   </main>
   
   <div v-else-if="loading" class="loading-state">
@@ -88,11 +101,13 @@ import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 import PinCard from '../components/PinCard.vue';
 import ProfileEditModal from '../components/ProfileEditModal.vue';
+import ReportModal from '../components/ReportModal.vue';
 
 const route = useRoute();
 const authStore = useAuthStore();
 const activeTab = ref('pins');
 const isEditModalOpen = ref(false);
+const showReportModal = ref(false);
 
 const profileUser = ref(null);
 const loading = ref(true);

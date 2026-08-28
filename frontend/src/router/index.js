@@ -26,6 +26,12 @@ const router = createRouter({
       meta: { requiresAuth: true }
     },
     {
+      path: '/my-pins',
+      name: 'my-pins',
+      component: () => import('../views/MyPinsView.vue'),
+      meta: { requiresAuth: true }
+    },
+    {
       path: '/boards/:id',
       name: 'board-detail',
       component: () => import('../views/BoardDetailView.vue')
@@ -58,6 +64,12 @@ const router = createRouter({
       name: 'register',
       component: RegisterView,
       meta: { requiresGuest: true }
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: () => import('../views/AdminDashboard.vue'),
+      meta: { requiresAuth: true, requiresAdmin: true }
     }
   ]
 });
@@ -74,6 +86,9 @@ router.beforeEach((to, from, next) => {
     else if (to.meta.requiresAuth && !authStore.isAuthenticated) {
       next({ name: 'login' });
     } 
+    else if (to.meta.requiresAdmin && !authStore.isAdmin) {
+      next({ name: 'home' });
+    }
     else {
       next();
     }

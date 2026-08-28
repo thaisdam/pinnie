@@ -69,6 +69,11 @@
             <p v-if="saveError" class="save-error">{{ saveError }}</p>
           </div>
           
+          <div class="creator-actions-row" v-if="authStore.isAuthenticated && pin.userId === authStore.user?.id">
+            <button class="btn-edit-pin" @click="showEditModal = true">Editar Pin</button>
+            <button class="btn-delete-pin" @click="showDeletePinModal = true">Excluir Pin</button>
+          </div>
+          
           <h1 v-if="pin.title" class="pin-title">{{ pin.title }}</h1>
           <p v-if="pin.description" class="pin-description">{{ pin.description }}</p>
           
@@ -102,6 +107,10 @@
               <span class="creator-id">Usuário do Pinnie</span>
             </div>
           </div>
+          
+          <button v-if="authStore.isAuthenticated" @click="showReportModal = true" class="btn-report" style="margin-top: 8px; font-size: 0.8rem; background: transparent; border: none; color: var(--color-text-light); text-decoration: underline; cursor: pointer;">
+            Reportar Pin
+          </button>
           
           <!-- Seção de Comentários -->
           <div class="comments-section">
@@ -158,19 +167,54 @@
       </div>
     </div>
     
+    <ReportModal 
+      :show="showReportModal" 
+      targetType="PIN" 
+      :targetId="pinId" 
+      @close="showReportModal = false" 
+      @success="() => { showReportModal = false; alert('Denúncia enviada com sucesso!'); }" 
+    />
+    
+    <!-- Modal de Edição de Pin -->
+    <PinEditModal 
+      :show="showEditModal" 
+      :pin="pin"
+      @close="showEditModal = false"
+      @success="handlePinEdited"
+    />
+
+    <!-- Modal de Exclusão de Pin -->
+    <div v-if="showDeletePinModal" class="modal-overlay" @click.self="showDeletePinModal = false">
+      <div class="modal-content">
+        <h3>Excluir Pin?</h3>
+        <p>Você tem certeza? Esta ação removerá o Pin permanentemente e não pode ser desfeita.</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" @click="showDeletePinModal = false">Cancelar</button>
+          <button class="btn-delete" @click="confirmDeletePin" :disabled="isDeletingPin">
+            {{ isDeletingPin ? 'Excluindo...' : 'Excluir Pin' }}
+          </button>
+        </div>
+      </div>
+    </div>
+    
   </main>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 import CommentItem from '../components/CommentItem.vue';
+import ReportModal from '../components/ReportModal.vue';
+import PinEditModal from '../components/PinEditModal.vue';
 
 const route = useRoute();
+const router = useRouter();
 const pinId = route.params.id;
 const authStore = useAuthStore();
+
+const showReportModal = ref(false);
 
 const pin = ref(null);
 const isLoading = ref(true);
@@ -390,6 +434,31 @@ const confirmDeleteComment = async () => {
   }
 };
 
+// --- Lógica de Edição e Exclusão do Pin ---
+const showEditModal = ref(false);
+const showDeletePinModal = ref(false);
+const isDeletingPin = ref(false);
+
+const handlePinEdited = (updatedPin) => {
+  pin.value = updatedPin;
+  showEditModal.value = false;
+};
+
+const confirmDeletePin = async () => {
+  isDeletingPin.value = true;
+  try {
+    await api.delete(`/pins/${pinId}`);
+    // Redireciona para home após excluir
+    router.push({ name: 'home' });
+  } catch (err) {
+    console.error('Erro ao excluir pin:', err);
+    alert('Erro ao excluir Pin.');
+  } finally {
+    isDeletingPin.value = false;
+    showDeletePinModal.value = false;
+  }
+};
+
 onMounted(() => {
   fetchPin();
   fetchMyBoards();
@@ -591,6 +660,43 @@ onMounted(() => {
 
 .external-link:hover {
   background-color: #efefef;
+}
+
+/* Creator Pin Actions */
+.creator-actions-row {
+  display: flex;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
+}
+
+.btn-edit-pin, .btn-delete-pin {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.btn-edit-pin {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+
+.btn-edit-pin:hover {
+  background-color: #efefef;
+}
+
+.btn-delete-pin {
+  background-color: transparent;
+  border: 1px solid #ff4444;
+  color: #ff4444;
+}
+
+.btn-delete-pin:hover {
+  background-color: #ff4444;
+  color: white;
 }
 
 /* Creator and Social Styles */

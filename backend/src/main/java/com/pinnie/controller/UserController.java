@@ -64,6 +64,7 @@ public class UserController {
                 user.getBio(),
                 user.getAvatarUrl(),
                 user.isEnabled(),
+                user.getRole(),
                 followersCount,
                 followingCount,
                 false
@@ -96,6 +97,7 @@ public class UserController {
                 user.getBio(),
                 user.getAvatarUrl(),
                 user.isEnabled(),
+                user.getRole(),
                 followersCount,
                 followingCount,
                 followedByMe
