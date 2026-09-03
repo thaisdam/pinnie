@@ -1,13 +1,15 @@
 <template>
   <div class="comment-item">
-    <img 
-      :src="authorAvatarUrl" 
-      alt="Avatar" 
-      class="comment-avatar"
-    />
+    <router-link :to="`/profile/${comment.authorId}`">
+      <img 
+        :src="authorAvatarUrl" 
+        alt="Avatar" 
+        class="comment-avatar"
+      />
+    </router-link>
     <div class="comment-content">
       <div class="comment-header">
-        <span class="comment-author">{{ comment.authorDisplayName || comment.authorUsername || 'Usuário' }}</span>
+        <router-link :to="`/profile/${comment.authorId}`" class="comment-author">{{ comment.authorDisplayName || comment.authorUsername || 'Usuário' }}</router-link>
         <span class="comment-date">{{ formattedDate }}</span>
       </div>
       <p class="comment-text">{{ comment.text }}</p>
@@ -95,6 +97,11 @@ const canDelete = computed(() => {
   font-weight: 600;
   color: var(--color-text);
   font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.comment-author:hover {
+  text-decoration: underline;
 }
 
 .comment-date {
