@@ -51,7 +51,7 @@
         
         <template v-else>
           <router-link to="/login" class="nav-link">Login</router-link>
-          <router-link to="/register" class="nav-link btn-signup">Criar conta</router-link>
+          <router-link to="/register" class="btn-signup">Criar conta</router-link>
         </template>
       </nav>
     </header>
@@ -248,5 +248,20 @@ const handleLogout = async () => {
 .btn-signup:hover {
   background-color: var(--color-primary-hover);
   text-decoration: none;
+}
+.btn-signup {
+  display: inline-block;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-primary);
+  color: white;
+  border-radius: 24px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn-signup:hover {
+  background-color: var(--color-primary-hover);
+  color: white;
 }
 </style>

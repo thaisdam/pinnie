@@ -258,12 +258,12 @@ function closeEditModal() {
 }
 
 .btn-secondary {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background-color: #FEFCAD;
+  border: 1px solid #FEFCAD;
 }
 
 .btn-secondary:hover {
-  background-color: #efefef;
+  background-color: #FFF56E;
 }
 
 .btn-primary {
