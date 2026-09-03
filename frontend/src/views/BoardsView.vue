@@ -179,11 +179,12 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  background-color: #FEFCAD;
+  border: 1px solid #FEFCAD;
   padding: 8px 16px;
   border-radius: 20px;
   font-weight: 600;
+  font-size: 14px;
   cursor: pointer;
   transition: all var(--transition-fast);
 }

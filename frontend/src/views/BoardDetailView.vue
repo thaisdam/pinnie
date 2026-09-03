@@ -5,6 +5,14 @@
     <header class="board-header" v-if="board">
       <h1 class="page-title">{{ board.name }} <i v-if="board.isPrivate" class="ph-fill ph-lock-key" title="Privada"></i></h1>
       <p class="board-desc" v-if="board.description">{{ board.description }}</p>
+      
+      <button 
+        v-if="isOwner" 
+        class="btn-edit-board" 
+        @click="showEditModal = true"
+      >
+        Editar Pasta
+      </button>
     </header>
 
     <!-- Estados -->
@@ -41,16 +49,28 @@
       </div>
     </div>
 
+    <BoardEditModal 
+      v-if="board"
+      :is-open="showEditModal" 
+      :board="board"
+      @close="showEditModal = false"
+      @updated="handleBoardUpdated"
+      @deleted="handleBoardDeleted"
+    />
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
-import { useRoute } from 'vue-router';
+import { ref, onMounted, computed } from 'vue';
+import { useRoute, useRouter } from 'vue-router';
+import { useAuthStore } from '../stores/auth';
 import api from '../services/api';
 import PinCard from '../components/PinCard.vue';
+import BoardEditModal from '../components/BoardEditModal.vue';
 
 const route = useRoute();
+const router = useRouter();
+const authStore = useAuthStore();
 const boardId = route.params.id;
 
 const board = ref(null);
@@ -60,6 +80,21 @@ const error = ref(null);
 
 const page = ref(0);
 const hasNext = ref(false);
+
+const showEditModal = ref(false);
+
+const isOwner = computed(() => {
+  return board.value && authStore.user && board.value.userId === authStore.user.id;
+});
+
+const handleBoardUpdated = (updatedBoard) => {
+  board.value = updatedBoard;
+};
+
+const handleBoardDeleted = () => {
+  // router.push already called in modal, mas por segurança
+  router.push('/boards');
+};
 
 const fetchData = async () => {
   isLoading.value = true;
@@ -138,7 +173,23 @@ onMounted(() => {
   font-size: 1rem;
   color: var(--color-text-light);
   max-width: 600px;
-  margin: 0 auto;
+  margin: 0 auto var(--spacing-md) auto;
+}
+
+.btn-edit-board {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: var(--spacing-sm);
+  transition: background-color var(--transition-fast);
+}
+
+.btn-edit-board:hover {
+  background-color: #efefef;
 }
 
 /* States */

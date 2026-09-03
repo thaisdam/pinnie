@@ -340,7 +340,7 @@ function closeEditModal() {
 
 .board-cover {
   height: 150px;
-  background-color: #e9e9e9;
+  background-color: #FFF56E;
 }
 
 .board-info {

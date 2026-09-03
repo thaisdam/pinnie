@@ -84,11 +84,13 @@
           </div>
 
           <div class="pin-creator" v-if="creatorProfile">
-            <img :src="creatorAvatarUrl" alt="Avatar" class="creator-avatar" />
-            <div class="creator-info">
-              <span class="creator-id">{{ creatorProfile.displayName || creatorProfile.username }}</span>
-              <span class="creator-followers">{{ creatorProfile.followersCount }} seguidores</span>
-            </div>
+            <router-link :to="'/profile/' + creatorProfile.id" class="creator-link">
+              <img :src="creatorAvatarUrl" alt="Avatar" class="creator-avatar" />
+              <div class="creator-info">
+                <span class="creator-id">{{ creatorProfile.displayName || creatorProfile.username }}</span>
+                <span class="creator-followers">{{ creatorProfile.followersCount }} seguidores</span>
+              </div>
+            </router-link>
             
             <button 
               v-if="authStore.isAuthenticated && authStore.user.id !== creatorProfile.id"
@@ -108,7 +110,7 @@
             </div>
           </div>
           
-          <button v-if="authStore.isAuthenticated" @click="showReportModal = true" class="btn-report" style="margin-top: 8px; font-size: 0.8rem; background: transparent; border: none; color: var(--color-text-light); text-decoration: underline; cursor: pointer;">
+          <button v-if="authStore.isAuthenticated && authStore.user?.id !== pin?.userId" @click="showReportModal = true" class="btn-report" style="margin-top: 8px; font-size: 0.8rem; background: transparent; border: none; color: var(--color-text-light); text-decoration: underline; cursor: pointer;">
             Reportar Pin
           </button>
           
@@ -767,9 +769,22 @@ onMounted(() => {
   margin-top: auto;
   display: flex;
   align-items: center;
-  gap: var(--spacing-md);
+  justify-content: space-between;
   padding-top: var(--spacing-lg);
   border-top: 1px solid var(--color-border);
+}
+
+.creator-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-decoration: none;
+  color: inherit;
+  transition: opacity var(--transition-fast);
+}
+
+.creator-link:hover {
+  opacity: 0.8;
 }
 
 .creator-avatar {

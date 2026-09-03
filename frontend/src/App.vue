@@ -175,7 +175,7 @@ const handleLogout = async () => {
 }
 
 .nav-link:hover, .nav-link.router-link-active {
-  background-color: var(--color-surface);
+  background-color: #FEFCAD;
 }
 
 .nav-user-link {
@@ -191,7 +191,7 @@ const handleLogout = async () => {
 }
 
 .nav-user-link:hover {
-  background-color: var(--color-surface);
+  background-color: #FEFCAD;
 }
 
 .nav-avatar, .nav-avatar-placeholder {
@@ -228,7 +228,8 @@ const handleLogout = async () => {
 }
 
 .btn-logout:hover:not(:disabled) {
-  background: #f0f0f0;
+  background: #FEFCAD;
+  border-color: #FEFCAD;
 }
 
 .btn-logout:disabled {

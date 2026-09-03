@@ -43,7 +43,7 @@ public class SecurityConfig {
         http
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf
-                .csrfTokenRepository(new MyCsrfTokenRepository())
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
                 .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
             )
             .sessionManagement(org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer::disable)

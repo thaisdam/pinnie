@@ -80,6 +80,28 @@
         </div>
       </div>
     </div>
+    
+    <!-- Modal de Confirmação -->
+    <div v-if="confirmModal.show" class="modal-overlay" @click.self="closeConfirm">
+      <div class="modal-content">
+        <h3>{{ confirmModal.title }}</h3>
+        <p>{{ confirmModal.message }}</p>
+        <div class="modal-actions">
+          <button class="btn-cancel" @click="closeConfirm">Cancelar</button>
+          <button 
+            :class="confirmModal.isDanger ? 'btn-delete' : 'btn-primary'" 
+            @click="handleConfirm" 
+            :disabled="processing !== null">
+            {{ processing !== null ? 'Processando...' : confirmModal.confirmText }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast de Notificação -->
+    <div v-if="toast.show" class="toast" :class="{ 'toast-error': toast.isError }">
+      {{ toast.message }}
+    </div>
   </div>
 </template>
 
@@ -93,6 +115,42 @@ const reports = ref([]);
 const loading = ref(true);
 const error = ref('');
 const processing = ref(null);
+
+// Estados para Modal e Toast
+const confirmModal = ref({
+  show: false,
+  title: '',
+  message: '',
+  confirmText: '',
+  isDanger: false,
+  onConfirm: null
+});
+
+const toast = ref({
+  show: false,
+  message: '',
+  isError: false
+});
+
+const showConfirm = (title, message, confirmText, isDanger, onConfirm) => {
+  confirmModal.value = { show: true, title, message, confirmText, isDanger, onConfirm };
+};
+
+const closeConfirm = () => {
+  confirmModal.value.show = false;
+};
+
+const handleConfirm = async () => {
+  if (confirmModal.value.onConfirm) {
+    await confirmModal.value.onConfirm();
+  }
+  closeConfirm();
+};
+
+const showToast = (message, isError = false) => {
+  toast.value = { show: true, message, isError };
+  setTimeout(() => { toast.value.show = false; }, 3000);
+};
 
 const fetchReports = async () => {
   loading.value = true;
@@ -122,57 +180,70 @@ const openTarget = (report) => {
   window.open(url, '_blank');
 };
 
-const resolveReport = async (id, status) => {
-  if (!confirm(`Deseja realmente marcar esta denúncia como ${status}?`)) return;
-  
-  processing.value = id;
-  try {
-    await api.post(`/admin/reports/${id}/resolve?status=${status}`);
-    // Remover da lista
-    reports.value = reports.value.filter(r => r.id !== id);
-  } catch (err) {
-    alert('Erro ao resolver denúncia.');
-  } finally {
-    processing.value = null;
-  }
+const resolveReport = (id, status) => {
+  const isResolved = status === 'RESOLVED';
+  showConfirm(
+    isResolved ? 'Marcar como Resolvido?' : 'Ignorar Denúncia?',
+    isResolved ? 'A denúncia será fechada e sairá da fila de pendências.' : 'A denúncia será descartada por ser considerada um alarme falso.',
+    'Confirmar',
+    false,
+    async () => {
+      processing.value = id;
+      try {
+        await api.post(`/admin/reports/${id}/resolve?status=${status}`);
+        reports.value = reports.value.filter(r => r.id !== id);
+        showToast(`Denúncia ${isResolved ? 'resolvida' : 'ignorada'} com sucesso.`);
+      } catch (err) {
+        showToast('Erro ao resolver denúncia.', true);
+      } finally {
+        processing.value = null;
+      }
+    }
+  );
 };
 
-const deletePin = async (report) => {
-  if (!confirm('ATENÇÃO: Deseja EXCLUIR DEFINITIVAMENTE este Pin?')) return;
-  
-  processing.value = report.id;
-  try {
-    // 1. Excluir Pin
-    await api.delete(`/admin/pins/${report.targetId}`);
-    // 2. Marcar denúncia como resolvida automaticamente
-    await api.post(`/admin/reports/${report.id}/resolve?status=RESOLVED`);
-    
-    alert('Pin excluído com sucesso.');
-    reports.value = reports.value.filter(r => r.id !== report.id);
-  } catch (err) {
-    alert('Erro ao excluir Pin.');
-  } finally {
-    processing.value = null;
-  }
+const deletePin = (report) => {
+  showConfirm(
+    'Excluir Pin Definitivamente?',
+    'ATENÇÃO: Você tem certeza? Esta ação removerá o Pin permanentemente e resolverá a denúncia.',
+    'Excluir Pin',
+    true,
+    async () => {
+      processing.value = report.id;
+      try {
+        await api.delete(`/admin/pins/${report.targetId}`);
+        await api.post(`/admin/reports/${report.id}/resolve?status=RESOLVED`);
+        reports.value = reports.value.filter(r => r.id !== report.id);
+        showToast('Pin excluído e denúncia resolvida.');
+      } catch (err) {
+        showToast('Erro ao excluir Pin.', true);
+      } finally {
+        processing.value = null;
+      }
+    }
+  );
 };
 
-const blockUser = async (report) => {
-  if (!confirm('ATENÇÃO: Deseja BLOQUEAR DEFINITIVAMENTE o acesso deste usuário?')) return;
-  
-  processing.value = report.id;
-  try {
-    // 1. Bloquear usuário
-    await api.post(`/admin/users/${report.targetId}/block`);
-    // 2. Marcar denúncia como resolvida
-    await api.post(`/admin/reports/${report.id}/resolve?status=RESOLVED`);
-    
-    alert('Usuário bloqueado com sucesso.');
-    reports.value = reports.value.filter(r => r.id !== report.id);
-  } catch (err) {
-    alert('Erro ao bloquear usuário.');
-  } finally {
-    processing.value = null;
-  }
+const blockUser = (report) => {
+  showConfirm(
+    'Bloquear Usuário?',
+    'ATENÇÃO: O usuário perderá o acesso à plataforma e não poderá fazer login.',
+    'Bloquear Usuário',
+    true,
+    async () => {
+      processing.value = report.id;
+      try {
+        await api.post(`/admin/users/${report.targetId}/block`);
+        await api.post(`/admin/reports/${report.id}/resolve?status=RESOLVED`);
+        reports.value = reports.value.filter(r => r.id !== report.id);
+        showToast('Usuário bloqueado com sucesso.');
+      } catch (err) {
+        showToast('Erro ao bloquear usuário.', true);
+      } finally {
+        processing.value = null;
+      }
+    }
+  );
 };
 </script>
 
@@ -353,5 +424,107 @@ const blockUser = async (report) => {
 .btn-action.resolve {
   background-color: #e8f5e9;
   color: #2e7d32;
+}
+
+/* Modals & Toasts */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modal-content {
+  background-color: var(--color-surface);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.modal-content h3 {
+  margin-top: 0;
+  margin-bottom: var(--spacing-sm);
+  color: var(--color-text);
+}
+
+.modal-content p {
+  color: var(--color-text-light);
+  margin-bottom: var(--spacing-xl);
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: var(--spacing-md);
+}
+
+.btn-cancel {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: 1px solid var(--color-border);
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-delete {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: #ff4444;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-delete:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  padding: 10px 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: var(--color-primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #333;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 30px;
+  font-weight: 600;
+  z-index: 3000;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: slideUp 0.3s ease-out;
+}
+
+.toast-error {
+  background-color: #d32f2f;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
 }
 </style>

@@ -16,6 +16,7 @@ public class BoardResponseDTO {
     @Schema(description = "Descrição")
     private String description;
     @Schema(description = "Indica se a pasta é privada")
+    @com.fasterxml.jackson.annotation.JsonProperty("isPrivate")
     private boolean isPrivate;
     @Schema(description = "ID do dono da pasta")
     private UUID userId;

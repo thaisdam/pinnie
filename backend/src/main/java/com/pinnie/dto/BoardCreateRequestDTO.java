@@ -16,6 +16,7 @@ public class BoardCreateRequestDTO {
     private String description;
 
     @Schema(description = "Define se a pasta é privada (apenas o dono pode ver) ou pública", example = "false")
+    @com.fasterxml.jackson.annotation.JsonProperty("isPrivate")
     private boolean isPrivate;
 
     public BoardCreateRequestDTO() {}

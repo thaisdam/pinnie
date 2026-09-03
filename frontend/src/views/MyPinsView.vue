@@ -150,18 +150,21 @@ onUnmounted(() => {
 }
 
 .btn-primary {
-  background-color: var(--color-primary);
-  color: white;
-  padding: 10px 20px;
-  border-radius: 24px;
+  background-color: #FEFCAD;
+  border: 1px solid #FEFCAD;
+  color: var(--color-text);
+  padding: 8px 16px;
+  border-radius: 20px;
   font-weight: 600;
+  font-size: 14px;
   text-decoration: none;
   display: inline-block;
-  transition: background-color var(--transition-fast);
+  cursor: pointer;
+  transition: all var(--transition-fast);
 }
 
 .btn-primary:hover {
-  background-color: var(--color-primary-hover);
+  background-color: #efefef;
 }
 
 /* States */
