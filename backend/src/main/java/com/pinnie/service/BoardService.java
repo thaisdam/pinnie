@@ -46,12 +46,9 @@ public class BoardService {
     }
 
     public BoardResponseDTO updateBoard(UUID boardId, UUID requesterId, BoardUpdateRequestDTO request) {
-        System.out.println("UPDATE BOARD CALLED - boardId: " + boardId + ", requesterId: " + requesterId);
         Board board = findBoardOrThrow404(boardId);
 
-        System.out.println("Board Owner ID: " + board.getUser().getId());
         if (!board.getUser().getId().equals(requesterId)) {
-            System.out.println("MISMATCH! owner=" + board.getUser().getId() + ", requester=" + requesterId);
             throw new ResourceNotFoundException("Board not found");
         }
 
@@ -90,11 +87,7 @@ public class BoardService {
     }
 
     private Board findBoardOrThrow404(UUID boardId) {
-        System.out.println("FIND BOARD OR THROW 404 - boardId: " + boardId);
         return boardRepository.findById(boardId)
-                .orElseThrow(() -> {
-                    System.out.println("BOARD NOT FOUND IN DB!");
-                    return new ResourceNotFoundException("Board not found");
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("Board not found"));
     }
 }

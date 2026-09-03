@@ -16,7 +16,8 @@ spring:
     show-sql: false
 
 jwt:
-  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  # ATENÇÃO: Nunca use esta chave padrão em produção. Configure a variável de ambiente JWT_SECRET!
+  secret: ${JWT_SECRET:0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF}
   expiration: ${JWT_EXPIRATION:7200000}
 
 app:
