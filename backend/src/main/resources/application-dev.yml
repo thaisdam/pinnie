@@ -1,0 +1,13 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/pinnie_db
+    username: pinnie_user
+    password: pinnie_password
+
+jwt:
+  secret: 0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF0123456789ABCDEF
+
+app:
+  security:
+    cors:
+      allowed-origins: http://localhost:5173,http://127.0.0.1:5173

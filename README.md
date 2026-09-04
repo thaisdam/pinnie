@@ -140,7 +140,7 @@ Gerenciado inteiramente por **Flyway**, o banco possui 12 migrations (V1 a V12) 
 * `comments`, `pin_likes`, `user_follows`
 * `reports` (sistema de denúncias)
 
-Os relacionamentos utilizam `UUID` (e não inteiros auto-incrementais) como chaves primárias, adicionando uma camada extra de segurança contra enumeração.
+Os relacionamentos utilizam `UUID` (e não inteiros auto-incrementais) como chaves primárias, o que mitiga a enumeração previsível de registros. A segurança real contra acesso indevido (IDOR) é garantida estritamente pelas regras de autorização e verificação de propriedade implementadas no backend.
 
 ---
 

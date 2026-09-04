@@ -70,7 +70,7 @@ export const useAuthStore = defineStore('auth', {
           if (status === 401) {
             this.error = 'E-mail ou senha inválidos.';
           } else if (status === 403) {
-            this.error = 'Sua conta está desativada ou bloqueada.';
+            this.error = error.response.data?.message || 'Erro de segurança (CSRF) ou conta desativada.';
           } else if (status === 400 && error.response.data && error.response.data.message) {
             this.error = error.response.data.message;
           } else {
