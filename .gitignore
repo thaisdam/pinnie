@@ -37,3 +37,6 @@ auditoria_mvp.md
 # Uploads
 backend/uploads/
 backend/test-csrf.js
+
+# Agent Configs
+.agents/
