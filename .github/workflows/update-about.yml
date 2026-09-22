@@ -1,0 +1,77 @@
+name: Atualizar Descrição do Repositório com Gemini
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'README.md'
+      - 'backend/**'
+      - 'frontend/**'
+
+jobs:
+  update-repo-info:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      repository-write: critical
+
+    steps:
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      - name: Ler o README para contexto
+        id: read_readme
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            try {
+              const readme = fs.readFileSync('README.md', 'utf8');
+              return readme.slice(0, 1500);
+            } catch (e) {
+              return "Repositório de projeto fullstack.";
+            }
+
+      - name: Chamar a API do Gemini para gerar a descrição
+        id: gemini
+        uses: actions/github-script@v7
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          README_CONTENT: ${{ steps.read_readme.outputs.result }}
+        with:
+          script: |
+            const fetch = require('node-fetch');
+            const apiKey = process.env.GEMINI_API_KEY;
+            const readme = process.env.README_CONTENT;
+
+            const prompt = `Com base no seguinte trecho de README de um projeto de software, crie uma descrição curta, profissional e direta (com no máximo 150 caracteres) para a seção "About" de um repositório do GitHub. Retorne APENAS o texto da descrição, sem aspas e sem introduções.\n\nTrecho:\n${readme}`;
+
+            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }]
+              })
+            });
+
+            const data = await response.json();
+            const description = data.candidates[0].content.parts[0].text.trim();
+            console.log("Descrição gerada:", description);
+            core.setOutput('description', description);
+
+      - name: Atualizar o "About" do Repositório via API do GitHub
+        uses: actions/github-script@v7
+        env:
+          NEW_DESCRIPTION: ${{ steps.gemini.outputs.description }}
+        with:
+          script: |
+            const description = process.env.NEW_DESCRIPTION;
+            
+            await github.rest.repos.update({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              description: description,
+              topics: ["java", "spring-boot", "fullstack", "api"]
+            });
+            console.log("Repositório atualizado com sucesso!");
