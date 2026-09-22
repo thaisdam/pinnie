@@ -10,11 +10,13 @@ on:
       - 'frontend/**'
   workflow_dispatch:
 
+permissions:
+  contents: write
+  repository-projects: write
+
 jobs:
   update-repo-info:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
 
     steps:
       - name: Checkout do código
