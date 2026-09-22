@@ -13,8 +13,7 @@ jobs:
   update-repo-info:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      repository-write: critical
+      contents: write
 
     steps:
       - name: Checkout do código
